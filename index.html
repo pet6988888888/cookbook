@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookbook Creator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+/* Hide the 'Your Cookbook is Ready!' header when printing */
+@media print {
+  #printOutputDialog .p-6.bg-slate-700 {
+    display: none !important;
+  }
+}
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .recipe-card {
+            transition: all 0.2s;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .tag-button {
+            transition: all 0.2s;
+            cursor: pointer;
+            background-color: #475569;
+            color: #e2e8f0;
+        }
+
+        .tag-button.active {
+            background-color: #0d9488;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(13, 148, 136, 0.5);
+            transform: scale(1.05);
+        }
+
+        #coverPreview {
+            max-width: 100%;
+            height: auto;
+            aspect-ratio: 210/297; /* A4 ratio */
+        }
+
+        @media print {
+            #app, #recipeModal, #notificationArea {
+                display: none !important;
+            }
+            
+            #printOutputModal {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+                background-color: white !important;
+                display: block !important;
+            }
+            
+            #printOutputDialog {
+                width: 100% !important;
+                max-width: none !important;
+                height: auto !important;
+                max-height: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                overflow: visible !important;
+                padding: 0 !important;
+                transform: none !important;
+                background: white !important;
+            }
+
+            #printOutputHeaderControls {
+                display: none !important;
+            }
+
+            #printOutputDialog > div {
+                max-height: none !important;
+                overflow: visible !important;
+                padding: 0 !important;
+            }
+
+            #outputContentDiv {
+                padding: 0.5in !important;
+                max-height: none !important;
+                overflow: visible !important;
+                height: auto !important;
+                border: none !important;
+            }
+
+            * {
+                color: black !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+                background: white !important;
+            }
+            
+            .recipe-card-print {
+                page-break-inside: avoid;
+                margin-bottom: 1rem;
+            }
+
+            .recipe-image {
+                max-width: 100%;
+                height: auto;
+            }
+
+            #coverImage {
+                page-break-after: always;
+            }
+        }
+
+        #outputContentDiv {
+            min-height: 400px;
+            max-height: 60vh;
+            overflow-y: scroll;
+            background-color: #ffffff;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+            font-family: 'Playfair Display', serif; 
+        }
+
+        .instruction-list > li {
+            counter-increment: instruction-step;
+            margin-bottom: 0.5rem;
+        }
+        .instruction-list > li::before {
+            content: counter(instruction-step) ". ";
+            font-weight: bold;
+            color: #0d9488;
+        }
+        .instruction-list {
+            list-style: none;
+            counter-reset: instruction-step;
+            padding-left: 0;
+        }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background-color: #475569;
+            color: #94a3b8;
+        }
+
+        .step-circle.active {
+            background-color: #0d9488;
+            color: white;
+        }
+
+        .step-circle.completed {
+            background-color: #22c55e;
+            color: white;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div id="app" class="max-w-5xl mx-auto">
+        <header class="mb-8 p-6 bg-slate-800 rounded-xl shadow-2xl border-t-4 border-teal-500">
+            <h1 class="text-4xl font-extrabold text-teal-400 mb-2">Cookbook Creator</h1>
+            <p class="text-slate-400">Create your personalized cookbook in 3 easy steps</p>
+        </header>
+
+        <!-- Step Indicator -->
+        <div class="step-indicator mb-8">
+            <div class="step-circle active" id="step1Circle">1</div>
+            <div class="flex-1 h-1 bg-slate-700" id="line1"></div>
+            <div class="step-circle" id="step2Circle">2</div>
+            <div class="flex-1 h-1 bg-slate-700" id="line2"></div>
+            <div class="step-circle" id="step3Circle">3</div>
+        </div>
+
+        <!-- STEP 1: Upload Cover -->
+        <div id="step1" class="mb-8 p-6 bg-slate-800 rounded-xl shadow-xl">
+            <h2 class="text-2xl font-bold text-teal-400 mb-4">Step 1: Upload Cover Image</h2>
+            <p class="text-slate-300 mb-4">Upload an A4 portrait image for your cookbook cover (recommended: 2480 x 3508 pixels)</p>
+            
+            <input type="file" id="coverUpload" accept="image/*" class="block w-full text-sm text-slate-400 mb-4
+                file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                file:text-sm file:font-semibold file:bg-teal-600 file:text-white
+                hover:file:bg-teal-700 file:cursor-pointer">
+            
+            <div id="coverPreviewContainer" class="hidden">
+                <p class="text-sm text-slate-400 mb-2">Preview:</p>
+                <img id="coverPreview" class="rounded-lg border-2 border-slate-700 max-w-xs mx-auto" alt="Cover preview">
+            </div>
+
+            <button onclick="goToStep2()" class="mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">
+                Continue to Recipe Selection →
+            </button>
+        </div>
+
+        <!-- STEP 2: Select Recipes -->
+        <div id="step2" class="hidden mb-8">
+            <!-- Controls -->
+            <div class="p-6 bg-slate-800 rounded-xl shadow-xl mb-6">
+                <h2 class="text-2xl font-bold text-teal-400 mb-4">Step 2: Select Recipes</h2>
+                
+                <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                    <select id="dietFilter" class="w-full sm:w-1/3 p-3 border border-slate-700 rounded-xl bg-slate-700 text-slate-200 focus:ring-teal-500">
+                    </select>
+                    <input type="number" id="recipeCount" min="1" max="100" value="20" placeholder="Number of recipes" 
+                        class="w-full sm:w-1/4 p-3 border border-slate-700 rounded-xl bg-slate-700 text-slate-200 focus:ring-teal-500">
+                    <button onclick="autoFillRecipes()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">
+                        Auto-Fill Recipes
+                    </button>
+                </div>
+
+                <button onclick="openRecipeModal()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition mb-4">
+                    + Add Recipe Manually
+                </button>
+
+                <div id="recipeStats" class="flex flex-wrap gap-4 text-sm font-semibold text-slate-300">
+                    <span class="px-3 py-1 bg-blue-700 text-blue-200 rounded-full shadow-md">Selected: <span id="selectedCount">0</span></span>
+                    <span class="px-3 py-1 bg-teal-700 text-teal-200 rounded-full shadow-md">Categories: <span id="categoryCount">0</span></span>
+                </div>
+            </div>
+
+            <!-- Selected Recipes List -->
+            <div class="p-6 bg-slate-800 rounded-xl shadow-xl mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-teal-400">Your Cookbook Recipes</h3>
+                    <button onclick="clearRecipes()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-sm">
+                        Clear All
+                    </button>
+                </div>
+                <div id="selectedRecipesList" class="space-y-3 max-h-96 overflow-y-auto">
+                    <p class="text-slate-400 text-center py-8">No recipes selected yet. Use auto-fill or add manually.</p>
+                </div>
+            </div>
+
+            <button onclick="goToStep3()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">
+                Continue to Generate Cookbook →
+            </button>
+        </div>
+
+        <!-- STEP 3: Generate -->
+        <div id="step3" class="hidden mb-8">
+            <div class="p-6 bg-slate-800 rounded-xl shadow-xl">
+                <h2 class="text-2xl font-bold text-teal-400 mb-4">Step 3: Generate Your Cookbook</h2>
+                <p class="text-slate-300 mb-6">Review your selections and generate the final cookbook PDF</p>
+                
+                <div class="space-y-4 mb-6">
+                    <div class="p-4 bg-slate-700 rounded-lg">
+                        <p class="text-sm text-slate-300">Cover Image: <span class="text-teal-400 font-bold" id="coverStatus">Not uploaded</span></p>
+                    </div>
+                    <div class="p-4 bg-slate-700 rounded-lg">
+                        <p class="text-sm text-slate-300">Recipes Selected: <span class="text-teal-400 font-bold" id="finalRecipeCount">0</span></p>
+                    </div>
+                </div>
+
+                <button onclick="generateCookbook()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition text-lg">
+                    📖 Generate Cookbook
+                </button>
+
+                <button onclick="goToStep2()" class="mt-4 w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-xl">
+                    ← Back to Recipe Selection
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipe Selection Modal -->
+    <div id="recipeModal" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center p-4 z-50" onclick="if(event.target.id === 'recipeModal') closeRecipeModal()">
+        <div class="bg-slate-800 w-full max-w-lg max-h-[90vh] rounded-xl shadow-2xl overflow-hidden">
+            <div class="p-6 overflow-y-auto">
+                <h2 class="text-2xl font-bold text-teal-400 mb-4">Add Recipe to Cookbook</h2>
+                
+                <div class="mb-4 space-y-3 p-3 bg-slate-700 rounded-lg">
+                    <select id="categoryFilter" class="w-full p-3 border border-slate-600 rounded-lg bg-slate-600 text-slate-200" onchange="filterRecipes()">
+                        <option value="">All Categories</option>
+                    </select>
+                    
+                    <p class="text-sm font-semibold text-slate-300 mt-3">Filter by Tags:</p>
+                    <div id="tagButtonContainer" class="flex flex-wrap gap-2 pt-1">
+                    </div>
+                </div>
+
+                <div id="recipeList" class="space-y-3 max-h-80 overflow-y-auto pr-2">
+                </div>
+            </div>
+            
+            <div class="p-4 bg-slate-700 flex justify-end">
+                <button onclick="closeRecipeModal()" class="bg-slate-600 hover:bg-slate-500 text-slate-200 font-bold py-2 px-4 rounded-lg">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Output Modal -->
+    <div id="printOutputModal" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center p-4 z-50" onclick="if(event.target.id === 'printOutputModal') closePrintModal()">
+        <div id="printOutputDialog" class="bg-slate-800 w-full max-w-4xl max-h-[90vh] rounded-xl shadow-2xl overflow-hidden">
+            
+            <div class="p-6 bg-slate-700">
+                <h2 class="text-2xl font-bold text-teal-400 mb-4">Your Cookbook is Ready!</h2>
+                
+                <div id="printOutputHeaderControls" class="flex flex-wrap justify-end gap-3 mb-4">
+                    <button onclick="triggerPrint()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg">
+                        Print/Save as PDF
+                    </button>
+                    <button onclick="closePrintModal()" class="bg-slate-600 hover:bg-slate-500 text-slate-200 font-bold py-2 px-4 rounded-lg">
+                        Close
+                    </button>
+                </div>
+            </div> 
+
+            <div class="p-6 pt-0 max-h-[70vh] overflow-y-auto print:!max-h-none print:!overflow-visible print:!p-0">
+                <div id="outputContentDiv" class="w-full p-6 rounded-lg text-sm border-2 border-slate-700 print:!border-0 print:!rounded-none">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Area -->
+    <div id="notificationArea" class="hidden fixed inset-0 flex items-center justify-center z-50 p-4">
+    </div>
+
+    <script>
+        const CURATED_TAGS = [
+            'Gluten Free', 'Dairy Free', 'Low Carb', 'Meal Prep/Freezer Friendly',
+            'High Protein', 'Vegetarian', 'Quick', 'Contains Nuts'
+        ];
+
+        const MAJOR_DIETS = {
+            '': 'All Diets',
+            'Low Carb': 'Low Carb',
+            'Vegetarian': 'Vegetarian',
+            'High Protein': 'High Protein',
+            'Gluten Free': 'Gluten Free',
+            'Dairy Free': 'Dairy Free',
+        };
+
+        const RECIPES = [
+            { 
+                id: 'r1', name: 'Chocolate Baked Oats', category: 'Breakfast', 
+                ingredients: [{ name: 'Rolled Oats', quantity: '1 cup' }, { name: 'Cocoa Powder', quantity: '2 tbsp' }, { name: 'Milk', quantity: '1/2 cup' }, { name: 'Sweetener', quantity: 'to taste' }], 
+                instructions: '1. Preheat oven to 180°C. 2. Combine all ingredients in a bowl and mix well. 3. Pour into an oven-safe dish. 4. Bake for 20-25 minutes until set. Serve warm.', 
+                tags: ['Quick', 'High Protein', 'Vegetarian'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/cbo.jpg',
+                nutrition: { Prep: '5 mins', Cook: '20 mins', Kcal: 350, Fats: 10, Carbs: 55, Protein: 12, Fibre: 8 },
+                storage: 'Store in an airtight container for up to 3 days.'
+            },
+            { 
+                id: 'r2', name: 'Peach, Honey & Cinnamon Overnight Oats', category: 'Breakfast', 
+                ingredients: [{ name: 'Rolled Oats', quantity: '1 cup' }, { name: 'Milk', quantity: '1/2 cup' }, { name: 'Peaches, sliced', quantity: '1' }, { name: 'Honey', quantity: '1 tsp' }, { name: 'Cinnamon', quantity: '1/2 tsp' }], 
+                instructions: '1. Combine oats, milk, honey, and cinnamon in a jar. 2. Layer with sliced peaches. 3. Refrigerate overnight. Serve cold.', 
+                tags: ['Quick', 'Meal Prep/Freezer Friendly', 'Vegetarian'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_37.jpg',
+                nutrition: { Prep: '10 mins', Cook: '0 mins', Kcal: 290, Fats: 5, Carbs: 48, Protein: 10, Fibre: 6 },
+                storage: 'Store in the refrigerator for up to 2 days.'
+            },
+            { 
+                id: 'r3', name: 'Cheeseburger Omelet', category: 'Breakfast', 
+                ingredients: [{ name: 'Eggs', quantity: '3' }, { name: 'Ground Beef', quantity: '100g' }, { name: 'Cheese, shredded', quantity: '30g' }, { name: 'Onion, diced', quantity: '1/4' }], 
+                instructions: '1. Cook ground beef and onions. Drain fat. 2. Whisk eggs. Pour into a non-stick pan. 3. When edges set, add beef and cheese to one side. 4. Fold the omelet and cook until cheese melts.', 
+                tags: ['High Protein', 'Low Carb', 'Quick', 'Gluten Free'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_38.jpg',
+                nutrition: { Prep: '5 mins', Cook: '10 mins', Kcal: 450, Fats: 30, Carbs: 5, Protein: 40, Fibre: 1 },
+                storage: 'Best consumed immediately.'
+            },
+            { 
+                id: 'r4', name: 'Mexican Sweetcorn Frittata With Beef Bites', category: 'Breakfast', 
+                ingredients: [{ name: 'Eggs', quantity: '4' }, { name: 'Sweetcorn, canned', quantity: '1/2 cup' }, { name: 'Ground Beef (cooked)', quantity: '100g' }, { name: 'Feta Cheese', quantity: '20g' }, { name: 'Spices', quantity: '1 tsp' }], 
+                instructions: '1. Mix all ingredients except feta. 2. Pour into a small oven-safe pan. 3. Sprinkle with feta. 4. Bake at 180°C for 15-20 minutes until set.', 
+                tags: ['High Protein', 'Quick', 'Gluten Free'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_43.jpg',
+                nutrition: { Prep: '10 mins', Cook: '20 mins', Kcal: 400, Fats: 25, Carbs: 20, Protein: 35, Fibre: 3 },
+                storage: 'Store in the refrigerator for up to 3 days.'
+            },
+            { 
+                id: 'r5', name: 'Spicy Chicken & Chickpeas', category: 'Lunch', 
+                ingredients: [{ name: 'Chicken Breast', quantity: '150g' }, { name: 'Chickpeas, canned', quantity: '1/2 cup' }, { name: 'Spices (Chili/Cumin)', quantity: '1 tbsp' }, { name: 'Olive Oil', quantity: '1 tsp' }], 
+                tags: ['Meal Prep/Freezer Friendly', 'Gluten Free', 'High Protein', 'Dairy Free'], 
+                instructions: '1. Dice chicken and toss with spices. 2. Cook chicken in a pan until done. 3. Add chickpeas and cook until heated through. Serve with rice or salad.', 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_44.jpg',
+                nutrition: { Prep: '5 mins', Cook: '15 mins', Kcal: 380, Fats: 10, Carbs: 35, Protein: 38, Fibre: 7 },
+                storage: 'Store in the refrigerator for up to 4 days.'
+            },
+            { 
+                id: 'r6', name: 'Kale, Quinoa & Blueberry Salad', category: 'Lunch', 
+                ingredients: [{ name: 'Kale', quantity: '1 bunch' }, { name: 'Quinoa, cooked', quantity: '1/2 cup' }, { name: 'Blueberries', quantity: '1/2 cup' }, { name: 'Vinaigrette Dressing', quantity: '2 tbsp' }, { name: 'Toasted Pecans', quantity: '1/4 cup' }], 
+                instructions: '1. Massage kale with a little dressing to soften. 2. Combine kale, quinoa, blueberries, and pecans. 3. Toss with remaining dressing just before serving.', 
+                tags: ['Vegetarian', 'Quick', 'Gluten Free', 'Dairy Free', 'Contains Nuts'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_45.jpg',
+                nutrition: { Prep: '10 mins', Cook: '0 mins', Kcal: 320, Fats: 15, Carbs: 35, Protein: 8, Fibre: 6 },
+                storage: 'Store dry ingredients separate from dressing; lasts 3 days.'
+            },
+            { 
+                id: 'r7', name: 'High Protein Polenta Base BBQ Pizza', category: 'Dinner', 
+                ingredients: [{ name: 'Polenta', quantity: '1 cup' }, { name: 'BBQ Sauce', quantity: '2 tbsp' }, { name: 'Shredded Chicken', quantity: '50g' }, { name: 'Mozzarella', quantity: '1/2 cup' }, { name: 'Red Onion', quantity: '1/4' }], 
+                instructions: '1. Prepare polenta and spread onto a baking sheet to cool. 2. Top with BBQ sauce, chicken, mozzarella, and onion. 3. Bake at 200°C until cheese is bubbly and crust is firm.', 
+                tags: ['High Protein'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_46.jpg',
+                nutrition: { Prep: '15 mins', Cook: '15 mins', Kcal: 480, Fats: 18, Carbs: 50, Protein: 30, Fibre: 5 },
+                storage: 'Refrigerate leftovers for up to 2 days.'
+            },
+            { 
+                id: 'r8', name: 'Thai Fish Parcels', category: 'Dinner', 
+                ingredients: [{ name: 'White Fish Fillets', quantity: '2' }, { name: 'Coconut Milk', quantity: '1/4 cup' }, { name: 'Ginger, grated', quantity: '1 tsp' }, { name: 'Lime', quantity: '1/2' }, { name: 'Cilantro', quantity: '1 tbsp' }], 
+                instructions: '1. Place fish on foil. Top with coconut milk, ginger, lime slices, and cilantro. 2. Seal the foil into a parcel. 3. Bake at 180°C or steam for 15 minutes until fish is cooked.', 
+                tags: ['Low Carb', 'Quick', 'Gluten Free', 'Dairy Free'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_48.jpg',
+                nutrition: { Prep: '5 mins', Cook: '15 mins', Kcal: 310, Fats: 18, Carbs: 5, Protein: 35, Fibre: 1 },
+                storage: 'Best consumed immediately.'
+            },
+            { 
+                id: 'r9', name: 'Teriyaki Turkey Stir-Fry', category: 'Dinner', 
+                ingredients: [{ name: 'Turkey Mince', quantity: '200g' }, { name: 'Broccoli florets', quantity: '1 cup' }, { name: 'Soy Sauce', quantity: '2 tbsp' }, { name: 'Cooked Rice', quantity: '1 cup' }, { name: 'Teriyaki Sauce', quantity: '3 tbsp' }], 
+                instructions: '1. Brown turkey mince in a wok. 2. Add broccoli and stir-fry until tender-crisp. 3. Stir in teriyaki and soy sauce. 4. Serve over cooked rice.', 
+                tags: ['Quick', 'High Protein', 'Dairy Free'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_49.jpg',
+                nutrition: { Prep: '10 mins', Cook: '10 mins', Kcal: 420, Fats: 10, Carbs: 45, Protein: 40, Fibre: 5 },
+                storage: 'Store in airtight containers for up to 3 days.'
+            },
+            { 
+                id: 'r10', name: 'High Protein Tuna Bake', category: 'Dinner', 
+                ingredients: [{ name: 'Canned Tuna (in water)', quantity: '180g' }, { name: 'Cottage Cheese', quantity: '1/2 cup' }, { name: 'Wholemeal Pasta (cooked)', quantity: '1 cup' }, { name: 'Frozen Peas', quantity: '1/4 cup' }, { name: 'Breadcrumbs', quantity: '1 tbsp' }], 
+                instructions: '1. Mix tuna, cottage cheese, cooked pasta, and peas. 2. Place in an oven-safe dish. 3. Top with breadcrumbs. 4. Bake at 180°C for 15 minutes until golden brown.', 
+                tags: ['High Protein', 'Meal Prep/Freezer Friendly'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_50.jpg',
+                nutrition: { Prep: '10 mins', Cook: '15 mins', Kcal: 450, Fats: 8, Carbs: 50, Protein: 45, Fibre: 6 },
+                storage: 'Perfect for batch cooking; refrigerate up to 4 days.'
+            },
+            { 
+                id: 'r11', name: 'Keto Eggplant Lasagna', category: 'Dinner', 
+                ingredients: [{ name: 'Eggplant (thinly sliced)', quantity: '1 large' }, { name: 'Ground Beef', quantity: '250g' }, { name: 'Mozzarella Cheese (shredded)', quantity: '1 cup' }, { name: 'Tomato Sauce (low sugar)', quantity: '1/2 cup' }, { name: 'Ricotta Cheese', quantity: '1/2 cup' }], 
+                instructions: '1. Brown ground beef and mix with tomato sauce. 2. Layer eggplant, meat sauce, ricotta, and mozzarella in a baking dish. 3. Repeat layers. 4. Bake at 190°C for 30-40 minutes.', 
+                tags: ['Low Carb', 'Meal Prep/Freezer Friendly', 'Gluten Free', 'High Protein'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_51.jpg',
+                nutrition: { Prep: '20 mins', Cook: '40 mins', Kcal: 550, Fats: 35, Carbs: 20, Protein: 40, Fibre: 10 },
+                storage: 'Refrigerate for up to 4 days.'
+            }, 
+            { 
+                id: 'r12', name: '5-Minute Tomato Salsa', category: 'Snack', 
+                ingredients: [{ name: 'Tomatoes, diced', quantity: '2 large' }, { name: 'Red Onion, diced', quantity: '1/4' }, { name: 'Cilantro, chopped', quantity: '1/4 cup' }, { name: 'Lime Juice', quantity: '1 tbsp' }], 
+                instructions: '1. Combine all ingredients in a bowl. 2. Season with salt and pepper to taste. Serve immediately.', 
+                tags: ['Quick', 'Vegetarian', 'Gluten Free', 'Dairy Free'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_47.jpg',
+                nutrition: { Prep: '5 mins', Cook: '0 mins', Kcal: 50, Fats: 0, Carbs: 10, Protein: 2, Fibre: 2 },
+                storage: 'Store in the refrigerator for up to 3 days.'
+            }, 
+            { 
+                id: 'r13', name: 'Vanilla & Cinnamon Protein Balls', category: 'Snack', 
+                ingredients: [{ name: 'Rolled Oats', quantity: '¾ cup (60g)' }, { name: 'Almond Butter, smooth', quantity: '½ cup (125g)' }, { name: 'Almonds', quantity: '½ cup (75g)' }, { name: 'Honey', quantity: '4 tbsp.' }], 
+                instructions: '1. Place ingredients into a food processor and process until combined. 2. Roll into 16 balls. 3. Coat with protein powder and cinnamon mixture.', 
+                tags: ['High Protein', 'Contains Nuts', 'Meal Prep/Freezer Friendly', 'Vegetarian'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_54.jpg',
+                nutrition: { Prep: '10 mins', Cook: '0 mins', Kcal: 134, Fats: 8, Carbs: 12, Protein: 5, Fibre: 3 },
+                storage: 'Store in the refrigerator for up to 5 days.'
+            }
+        ];
+
+        let selectedRecipes = [];
+        let coverImageDataUrl = null;
+        let selectedTags = new Set();
+        let currentStep = 1;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeFilters();
+            setupCoverUpload();
+        });
+
+        function setupCoverUpload() {
+            document.getElementById('coverUpload').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        coverImageDataUrl = event.target.result;
+                        document.getElementById('coverPreview').src = coverImageDataUrl;
+                        document.getElementById('coverPreviewContainer').classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function initializeFilters() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+            const uniqueCategories = [...new Set(RECIPES.map(r => r.category))].sort();
+            uniqueCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+
+            const dietFilter = document.getElementById('dietFilter');
+            dietFilter.innerHTML = '';
+            Object.keys(MAJOR_DIETS).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = MAJOR_DIETS[key];
+                dietFilter.appendChild(option);
+            });
+
+            renderTagButtons();
+        }
+
+        function renderTagButtons() {
+            const tagContainer = document.getElementById('tagButtonContainer');
+            tagContainer.innerHTML = '';
+            
+            CURATED_TAGS.forEach(tag => {
+                const button = document.createElement('button');
+                button.textContent = tag;
+                button.setAttribute('data-tag', tag);
+                button.onclick = () => toggleTagFilter(tag);
+                button.className = `tag-button px-3 py-1 rounded-full text-xs font-semibold transition duration-150 whitespace-nowrap`;
+                
+                if (selectedTags.has(tag)) {
+                    button.classList.add('active');
+                }
+                tagContainer.appendChild(button);
+            });
+        }
+
+        function toggleTagFilter(tag) {
+            const button = document.querySelector(`[data-tag="${tag}"]`);
+            if (selectedTags.has(tag)) {
+                selectedTags.delete(tag);
+                button.classList.remove('active');
+            } else {
+                selectedTags.add(tag);
+                button.classList.add('active');
+            }
+            filterRecipes();
+        }
+
+        function filterRecipes() {
+            const listContainer = document.getElementById('recipeList');
+            const category = document.getElementById('categoryFilter').value;
+            const activeTags = Array.from(selectedTags);
+
+            const filtered = RECIPES.filter(recipe => {
+                const categoryMatch = !category || recipe.category === category;
+                const tagMatch = activeTags.every(tag => recipe.tags.includes(tag));
+                const notAlreadySelected = !selectedRecipes.find(r => r.id === recipe.id);
+                return categoryMatch && tagMatch && notAlreadySelected;
+            });
+
+            listContainer.innerHTML = filtered.map(recipe => `
+                <div class="p-4 bg-slate-900 border border-slate-700 rounded-xl cursor-pointer hover:bg-teal-900 transition recipe-card"
+                    onclick="addRecipe('${recipe.id}')">
+                    <div class="flex items-start gap-4">
+                        <img src="${recipe.image}" alt="${recipe.name}" 
+                            class="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                            onerror="this.onerror=null; this.src='https://placehold.co/80x80/cccccc/000000?text=Food';">
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-lg text-teal-400 mb-1">${recipe.name}</h3>
+                            <div class="text-xs text-slate-400 mb-2">${recipe.category}</div>
+                            <div class="flex gap-2 text-sm font-semibold">
+                                <span class="bg-indigo-700 text-indigo-200 px-2 py-1 rounded-full text-xs">${recipe.nutrition.Kcal} kcal</span>
+                                <span class="bg-teal-700 text-teal-200 px-2 py-1 rounded-full text-xs">${recipe.nutrition.Protein}g protein</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '<p class="text-center text-slate-400 p-4">No recipes available</p>';
+            }
+        }
+
+        function updateStepIndicator() {
+            [1, 2, 3].forEach(step => {
+                const circle = document.getElementById(`step${step}Circle`);
+                if (step < currentStep) {
+                    circle.className = 'step-circle completed';
+                } else if (step === currentStep) {
+                    circle.className = 'step-circle active';
+                } else {
+                    circle.className = 'step-circle';
+                }
+            });
+        }
+
+        function goToStep2() {
+            if (!coverImageDataUrl) {
+                showNotification('Please upload a cover image first!', 'error');
+                return;
+            }
+            currentStep = 2;
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('step3').classList.add('hidden');
+            updateStepIndicator();
+        }
+
+        function goToStep3() {
+            if (selectedRecipes.length === 0) {
+                showNotification('Please add at least one recipe!', 'error');
+                return;
+            }
+            currentStep = 3;
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.remove('hidden');
+            document.getElementById('coverStatus').textContent = 'Uploaded ✓';
+            document.getElementById('finalRecipeCount').textContent = selectedRecipes.length;
+            updateStepIndicator();
+        }
+
+        function addRecipe(recipeId) {
+            const recipe = RECIPES.find(r => r.id === recipeId);
+            if (recipe && !selectedRecipes.find(r => r.id === recipeId)) {
+                selectedRecipes.push(recipe);
+                renderSelectedRecipes();
+                closeRecipeModal();
+                showNotification(`Added "${recipe.name}" to cookbook!`, 'success');
+            }
+        }
+
+        function removeRecipe(recipeId) {
+            selectedRecipes = selectedRecipes.filter(r => r.id !== recipeId);
+            renderSelectedRecipes();
+        }
+
+        function renderSelectedRecipes() {
+            const container = document.getElementById('selectedRecipesList');
+            
+            if (selectedRecipes.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 text-center py-8">No recipes selected yet</p>';
+            } else {
+                container.innerHTML = selectedRecipes.map(recipe => `
+                    <div class="flex items-center gap-4 p-3 bg-slate-700 rounded-lg">
+                        <img src="${recipe.image}" alt="${recipe.name}" 
+                            class="w-16 h-16 object-cover rounded"
+                            onerror="this.onerror=null; this.src='https://placehold.co/64x64/cccccc/000000?text=Food';">
+                        <div class="flex-grow">
+                            <h4 class="font-bold text-teal-400">${recipe.name}</h4>
+                            <p class="text-xs text-slate-400">${recipe.category}</p>
+                        </div>
+                        <button onclick="removeRecipe('${recipe.id}')" 
+                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                            Remove
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('selectedCount').textContent = selectedRecipes.length;
+            const categories = new Set(selectedRecipes.map(r => r.category));
+            document.getElementById('categoryCount').textContent = categories.size;
+        }
+
+        function autoFillRecipes() {
+            const dietFilterValue = document.getElementById('dietFilter').value;
+            const count = parseInt(document.getElementById('recipeCount').value) || 20;
+            const dietTag = MAJOR_DIETS[dietFilterValue];
+
+            let available = RECIPES.filter(r => !selectedRecipes.find(s => s.id === r.id));
+            
+            if (dietTag && dietFilterValue !== '') {
+                available = available.filter(r => r.tags.includes(dietTag));
+            }
+
+            if (available.length === 0) {
+                showNotification('No more recipes available with selected filter!', 'error');
+                return;
+            }
+
+            const toAdd = available.slice(0, Math.min(count, available.length));
+            selectedRecipes.push(...toAdd);
+            renderSelectedRecipes();
+            showNotification(`Added ${toAdd.length} recipes to your cookbook!`, 'success');
+        }
+
+        function clearRecipes() {
+            selectedRecipes = [];
+            renderSelectedRecipes();
+            showNotification('All recipes cleared!', 'success');
+        }
+
+        function openRecipeModal() {
+            document.getElementById('categoryFilter').value = '';
+            selectedTags.clear();
+            renderTagButtons();
+            filterRecipes();
+            document.getElementById('recipeModal').classList.remove('hidden');
+            document.getElementById('recipeModal').classList.add('flex');
+        }
+
+        function closeRecipeModal() {
+            document.getElementById('recipeModal').classList.add('hidden');
+            document.getElementById('recipeModal').classList.remove('flex');
+        }
+
+        function parseInstructions(instructionsString) {
+            const steps = instructionsString.split(/\d+\.\s/).filter(s => s.trim() !== '');
+            return steps;
+        }
+
+        function generateCookbook() {
+            if (!coverImageDataUrl || selectedRecipes.length === 0) {
+                showNotification('Please complete all steps first!', 'error');
+                return;
+            }
+
+            let htmlContent = `
+                <div class="space-y-12 print:text-black font-['Inter']">
+                    <!-- Cover Page -->
+                    <div id="coverImage" style="page-break-after: always; text-align: center;">
+                        <img src="${coverImageDataUrl}" alt="Cookbook Cover" style="width: 100%; max-width: 800px; height: auto; margin: 0 auto;">
+                    </div>
+
+                    <!-- Table of Contents -->
+                    <div style="page-break-after: always;">
+                        <h1 class="font-['Playfair_Display'] text-5xl font-extrabold text-teal-700 text-center mb-8">Table of Contents</h1>
+                        <div class="space-y-2">
+                            ${selectedRecipes.map((recipe, index) => `
+                                <div class="flex justify-between border-b border-gray-200 pb-2">
+                                    <span class="font-semibold">${recipe.name}</span>
+                                    <span class="text-gray-600">Page ${index + 3}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Recipe Pages -->
+                    ${selectedRecipes.map(recipe => {
+                        const steps = parseInstructions(recipe.instructions);
+                        return `
+                            <div class="recipe-card-print" style="page-break-before: always; page-break-inside: avoid;">
+                                <div class="p-6 border-2 border-gray-100 rounded-xl bg-white">
+                                    <h2 class="font-['Playfair_Display'] text-4xl font-extrabold text-blue-700 mb-2">${recipe.name}</h2>
+                                    <p class="text-sm text-gray-500 mb-4 italic">Category: ${recipe.category} | Tags: ${recipe.tags.join(', ')}</p>
+                                    
+                                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center p-3 mb-4 bg-teal-50 rounded-lg">
+                                        <div class="font-bold text-teal-800 text-xs">Prep: <span class="block text-sm text-gray-800">${recipe.nutrition.Prep}</span></div>
+                                        <div class="font-bold text-teal-800 text-xs">Cook: <span class="block text-sm text-gray-800">${recipe.nutrition.Cook}</span></div>
+                                        <div class="font-bold text-teal-800 text-xs">Kcal: <span class="block text-sm text-gray-800">${recipe.nutrition.Kcal}</span></div>
+                                        <div class="font-bold text-teal-800 text-xs">Protein: <span class="block text-sm text-gray-800">${recipe.nutrition.Protein}g</span></div>
+                                        <div class="font-bold text-teal-800 text-xs">Fibre: <span class="block text-sm text-gray-800">${recipe.nutrition.Fibre}g</span></div>
+                                    </div>
+
+                                    <div class="flex flex-col sm:flex-row gap-6">
+                                        <div class="sm:w-1/3 space-y-4">
+                                            <img src="${recipe.image}" alt="${recipe.name}" class="w-full h-auto rounded-lg shadow-lg"
+                                                onerror="this.onerror=null; this.src='https://placehold.co/300x200/cccccc/000000?text=Recipe';">
+
+                                            <h4 class="text-xl font-bold text-teal-600 mb-2 border-b border-teal-300">INGREDIENTS</h4>
+                                            <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                                ${recipe.ingredients.map(ing => `<li class="text-sm"><span class="font-semibold">${ing.quantity}</span> ${ing.name}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="sm:w-2/3">
+                                            <h4 class="text-xl font-bold text-teal-600 mb-2 border-b border-teal-300">INSTRUCTIONS</h4>
+                                            <ol class="space-y-3 text-gray-700 instruction-list">
+                                                ${steps.map(step => `<li>${step.trim()}</li>`).join('')}
+                                            </ol>
+
+                                            <div class="mt-6 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                                <h4 class="text-sm font-bold text-gray-800 uppercase mb-1">Storage:</h4>
+                                                <p class="text-sm text-gray-600 italic">${recipe.storage}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            document.getElementById('outputContentDiv').innerHTML = htmlContent;
+            document.getElementById('printOutputModal').classList.remove('hidden');
+            document.getElementById('printOutputModal').classList.add('flex');
+        }
+
+        function triggerPrint() {
+            setTimeout(() => window.print(), 100);
+        }
+
+        function closePrintModal() {
+            document.getElementById('printOutputModal').classList.add('hidden');
+            document.getElementById('printOutputModal').classList.remove('flex');
+        }
+
+        function showNotification(message, type) {
+            const notificationArea = document.getElementById('notificationArea');
+            const bgClass = type === 'error' ? 'bg-red-900 text-red-200 border-red-400' : 'bg-green-900 text-green-200 border-green-400';
+            
+            notificationArea.innerHTML = `<div class="p-6 ${bgClass} rounded-xl shadow-2xl border">${message}</div>`;
+            notificationArea.classList.remove('hidden');
+            notificationArea.classList.add('flex');
+
+            setTimeout(() => {
+                notificationArea.classList.add('hidden');
+                notificationArea.classList.remove('flex');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
