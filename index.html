@@ -1,59 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cookbook Creator</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cookbook Creator with Cover Designer</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-/* Hide the 'Your Cookbook is Ready!' header when printing */
-@media print {
-  #printOutputDialog .p-6.bg-slate-700 {
-    display: none !important;
-  }
-}
+        /* General styles from cookbook.html */
+        @media print {
+            #printOutputDialog .p-6.bg-slate-700 {
+                display: none !important;
+            }
+        }
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
-        
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0f172a;
             color: #e2e8f0;
         }
-
         .recipe-card {
             transition: all 0.2s;
         }
-
         .recipe-card:hover {
             transform: translateY(-2px);
         }
-
         .tag-button {
             transition: all 0.2s;
             cursor: pointer;
             background-color: #475569;
             color: #e2e8f0;
         }
-
         .tag-button.active {
             background-color: #0d9488;
             color: white;
             box-shadow: 0 4px 6px -1px rgba(13, 148, 136, 0.5);
             transform: scale(1.05);
         }
-
         #coverPreview {
             max-width: 100%;
             height: auto;
             aspect-ratio: 210/297; /* A4 ratio */
         }
-
         @media print {
             #app, #recipeModal, #notificationArea {
                 display: none !important;
             }
-            
             #printOutputModal {
                 position: absolute !important;
                 top: 0 !important;
@@ -65,7 +58,6 @@
                 background-color: white !important;
                 display: block !important;
             }
-            
             #printOutputDialog {
                 width: 100% !important;
                 max-width: none !important;
@@ -78,17 +70,14 @@
                 transform: none !important;
                 background: white !important;
             }
-
             #printOutputHeaderControls {
                 display: none !important;
             }
-
             #printOutputDialog > div {
                 max-height: none !important;
                 overflow: visible !important;
                 padding: 0 !important;
             }
-
             #outputContentDiv {
                 padding: 0.5in !important;
                 max-height: none !important;
@@ -96,29 +85,24 @@
                 height: auto !important;
                 border: none !important;
             }
-
             * {
                 color: black !important;
                 box-shadow: none !important;
                 text-shadow: none !important;
                 background: white !important;
             }
-            
             .recipe-card-print {
                 page-break-inside: avoid;
                 margin-bottom: 1rem;
             }
-
             .recipe-image {
                 max-width: 100%;
                 height: auto;
             }
-
             #coverImage {
                 page-break-after: always;
             }
         }
-
         #outputContentDiv {
             min-height: 400px;
             max-height: 60vh;
@@ -126,9 +110,8 @@
             background-color: #ffffff;
             color: #1f2937;
             border: 1px solid #d1d5db;
-            font-family: 'Playfair Display', serif; 
+            font-family: 'Playfair Display', serif;
         }
-
         .instruction-list > li {
             counter-increment: instruction-step;
             margin-bottom: 0.5rem;
@@ -143,14 +126,12 @@
             counter-reset: instruction-step;
             padding-left: 0;
         }
-
         .step-indicator {
             display: flex;
             align-items: center;
             gap: 1rem;
             margin-bottom: 2rem;
         }
-
         .step-circle {
             width: 40px;
             height: 40px;
@@ -162,15 +143,31 @@
             background-color: #475569;
             color: #94a3b8;
         }
-
         .step-circle.active {
             background-color: #0d9488;
             color: white;
         }
-
         .step-circle.completed {
             background-color: #22c55e;
             color: white;
+        }
+
+        /* Toggle buttons for cover mode */
+        #coverModeToggle button {
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #coverModeToggle button.active {
+            background-color: #0d9488;
+            color: white;
+        }
+        #coverModeToggle button:not(.active) {
+            background-color: #475569;
+            color: #e2e8f0;
         }
     </style>
 </head>
@@ -193,20 +190,21 @@
 
         <!-- STEP 1: Upload Cover -->
         <div id="step1" class="mb-8 p-6 bg-slate-800 rounded-xl shadow-xl">
-            <h2 class="text-2xl font-bold text-teal-400 mb-4">Step 1: Upload Cover Image</h2>
-            <p class="text-slate-300 mb-4">Upload an A4 portrait image for your cookbook cover (recommended: 2480 x 3508 pixels)</p>
-            
-            <input type="file" id="coverUpload" accept="image/*" class="block w-full text-sm text-slate-400 mb-4
-                file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-                file:text-sm file:font-semibold file:bg-teal-600 file:text-white
-                hover:file:bg-teal-700 file:cursor-pointer">
-            
-            <div id="coverPreviewContainer" class="hidden">
-                <p class="text-sm text-slate-400 mb-2">Preview:</p>
-                <img id="coverPreview" class="rounded-lg border-2 border-slate-700 max-w-xs mx-auto" alt="Cover preview">
+            <h2 class="text-2xl font-bold text-teal-400 mb-4">Step 1: Cover Image</h2>
+            <p class="text-slate-300 mb-4">Upload your A4 portrait cover image.</p>
+
+            <div id="uploadCoverSection">
+                <input type="file" id="coverUpload" accept="image/*" class="block w-full text-sm text-slate-400 mb-4
+                    file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                    file:text-sm file:font-semibold file:bg-teal-600 file:text-white
+                    hover:file:bg-teal-700 file:cursor-pointer">
+                <div id="coverPreviewContainer" class="hidden">
+                    <p class="text-sm text-slate-400 mb-2">Preview:</p>
+                    <img id="coverPreview" class="rounded-lg border-2 border-slate-700 max-w-xs mx-auto" alt="Cover preview" />
+                </div>
             </div>
 
-            <button onclick="goToStep2()" class="mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">
+            <button onclick="continueFromCover()" class="mt-6 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">
                 Continue to Recipe Selection →
             </button>
         </div>
@@ -216,11 +214,11 @@
             <!-- Controls -->
             <div class="p-6 bg-slate-800 rounded-xl shadow-xl mb-6">
                 <h2 class="text-2xl font-bold text-teal-400 mb-4">Step 2: Select Recipes</h2>
-                
+
                 <div class="flex flex-col sm:flex-row gap-4 mb-4">
                     <select id="dietFilter" class="w-full sm:w-1/3 p-3 border border-slate-700 rounded-xl bg-slate-700 text-slate-200 focus:ring-teal-500">
                     </select>
-                    <input type="number" id="recipeCount" min="1" max="100" value="20" placeholder="Number of recipes" 
+                    <input type="number" id="recipeCount" min="1" max="100" value="20" placeholder="Number of recipes"
                         class="w-full sm:w-1/4 p-3 border border-slate-700 rounded-xl bg-slate-700 text-slate-200 focus:ring-teal-500">
                     <button onclick="autoFillRecipes()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">
                         Auto-Fill Recipes
@@ -250,8 +248,11 @@
                 </div>
             </div>
 
-            <button onclick="goToStep3()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">
+            <button onclick="goToStep3()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition mb-4">
                 Continue to Generate Cookbook →
+            </button>
+            <button onclick="backToCover()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">
+                ← Back to Cover
             </button>
         </div>
 
@@ -260,7 +261,7 @@
             <div class="p-6 bg-slate-800 rounded-xl shadow-xl">
                 <h2 class="text-2xl font-bold text-teal-400 mb-4">Step 3: Generate Your Cookbook</h2>
                 <p class="text-slate-300 mb-6">Review your selections and generate the final cookbook PDF</p>
-                
+
                 <div class="space-y-4 mb-6">
                     <div class="p-4 bg-slate-700 rounded-lg">
                         <p class="text-sm text-slate-300">Cover Image: <span class="text-teal-400 font-bold" id="coverStatus">Not uploaded</span></p>
@@ -286,21 +287,19 @@
         <div class="bg-slate-800 w-full max-w-lg max-h-[90vh] rounded-xl shadow-2xl overflow-hidden">
             <div class="p-6 overflow-y-auto">
                 <h2 class="text-2xl font-bold text-teal-400 mb-4">Add Recipe to Cookbook</h2>
-                
+
                 <div class="mb-4 space-y-3 p-3 bg-slate-700 rounded-lg">
                     <select id="categoryFilter" class="w-full p-3 border border-slate-600 rounded-lg bg-slate-600 text-slate-200" onchange="filterRecipes()">
                         <option value="">All Categories</option>
                     </select>
-                    
+
                     <p class="text-sm font-semibold text-slate-300 mt-3">Filter by Tags:</p>
-                    <div id="tagButtonContainer" class="flex flex-wrap gap-2 pt-1">
-                    </div>
+                    <div id="tagButtonContainer" class="flex flex-wrap gap-2 pt-1"></div>
                 </div>
 
-                <div id="recipeList" class="space-y-3 max-h-80 overflow-y-auto pr-2">
-                </div>
+                <div id="recipeList" class="space-y-3 max-h-80 overflow-y-auto pr-2"></div>
             </div>
-            
+
             <div class="p-4 bg-slate-700 flex justify-end">
                 <button onclick="closeRecipeModal()" class="bg-slate-600 hover:bg-slate-500 text-slate-200 font-bold py-2 px-4 rounded-lg">
                     Close
@@ -312,10 +311,8 @@
     <!-- Print Output Modal -->
     <div id="printOutputModal" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center p-4 z-50" onclick="if(event.target.id === 'printOutputModal') closePrintModal()">
         <div id="printOutputDialog" class="bg-slate-800 w-full max-w-4xl max-h-[90vh] rounded-xl shadow-2xl overflow-hidden">
-            
             <div class="p-6 bg-slate-700">
                 <h2 class="text-2xl font-bold text-teal-400 mb-4">Your Cookbook is Ready!</h2>
-                
                 <div id="printOutputHeaderControls" class="flex flex-wrap justify-end gap-3 mb-4">
                     <button onclick="triggerPrint()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg">
                         Print/Save as PDF
@@ -325,19 +322,17 @@
                     </button>
                 </div>
             </div> 
-
             <div class="p-6 pt-0 max-h-[70vh] overflow-y-auto print:!max-h-none print:!overflow-visible print:!p-0">
-                <div id="outputContentDiv" class="w-full p-6 rounded-lg text-sm border-2 border-slate-700 print:!border-0 print:!rounded-none">
-                </div>
+                <div id="outputContentDiv" class="w-full p-6 rounded-lg text-sm border-2 border-slate-700 print:!border-0 print:!rounded-none"></div>
             </div>
         </div>
     </div>
 
     <!-- Notification Area -->
-    <div id="notificationArea" class="hidden fixed inset-0 flex items-center justify-center z-50 p-4">
-    </div>
+    <div id="notificationArea" class="hidden fixed inset-0 flex items-center justify-center z-50 p-4"></div>
 
     <script>
+        // Variables for cookbook app
         const CURATED_TAGS = [
             'Gluten Free', 'Dairy Free', 'Low Carb', 'Meal Prep/Freezer Friendly',
             'High Protein', 'Vegetarian', 'Quick', 'Contains Nuts'
@@ -353,7 +348,7 @@
         };
 
         const RECIPES = [
-            { 
+                        { 
                 id: 'r1', name: 'Chocolate Baked Oats', category: 'Breakfast', 
                 ingredients: [{ name: 'Rolled Oats', quantity: '1 cup' }, { name: 'Cocoa Powder', quantity: '2 tbsp' }, { name: 'Milk', quantity: '1/2 cup' }, { name: 'Sweetener', quantity: 'to taste' }], 
                 instructions: '1. Preheat oven to 180°C. 2. Combine all ingredients in a bowl and mix well. 3. Pour into an oven-safe dish. 4. Bake for 20-25 minutes until set. Serve warm.', 
@@ -388,7 +383,7 @@
                 image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_43.jpg',
                 nutrition: { Prep: '10 mins', Cook: '20 mins', Kcal: 400, Fats: 25, Carbs: 20, Protein: 35, Fibre: 3 },
                 storage: 'Store in the refrigerator for up to 3 days.'
-            },
+            }, 
             { 
                 id: 'r5', name: 'Spicy Chicken & Chickpeas', category: 'Lunch', 
                 ingredients: [{ name: 'Chicken Breast', quantity: '150g' }, { name: 'Chickpeas, canned', quantity: '1/2 cup' }, { name: 'Spices (Chili/Cumin)', quantity: '1 tbsp' }, { name: 'Olive Oil', quantity: '1 tsp' }], 
@@ -463,26 +458,481 @@
             }, 
             { 
                 id: 'r13', name: 'Vanilla & Cinnamon Protein Balls', category: 'Snack', 
-                ingredients: [{ name: 'Rolled Oats', quantity: '¾ cup (60g)' }, { name: 'Almond Butter, smooth', quantity: '½ cup (125g)' }, { name: 'Almonds', quantity: '½ cup (75g)' }, { name: 'Honey', quantity: '4 tbsp.' }], 
-                instructions: '1. Place ingredients into a food processor and process until combined. 2. Roll into 16 balls. 3. Coat with protein powder and cinnamon mixture.', 
+                ingredients: [{ name: 'Rolled Oats', quantity: '¾ cup (60g)' }, { name: 'Almond Butter, smooth', quantity: '½ cup (125g)' }, { name: 'Almonds', quantity: '½ cup (75g)' }, { name: 'Honey', quantity: '4 tbsp.' }, { name: 'Vanilla Whey Protein Powder', quantity: '1 scoop (25g)' }, { name: 'Ground Cinnamon', quantity: '1 tsp' }, { name: 'Vanilla Extract', quantity: '1 tsp' }, { name: 'Water', quantity: '2 tbsp' }], 
+                instructions: '1. Place the oats, almond butter, almonds, honey, protein powder, cinnamon and vanilla extract into a food processor and process until a dough like consistency forms. Add the 2 tablespoons of water and continue to blitz the mixture until the balls start to stick together. 2. Roll the mixture into 16 balls (about 1 tablespoon per ball). 3. Mix 2 tablespoons of vanilla protein powder and 1 teaspoon ground cinnamon in a large zip-lock bag. Place the protein balls inside the bag and gently toss in the mixture until the balls are coated.', 
                 tags: ['High Protein', 'Contains Nuts', 'Meal Prep/Freezer Friendly', 'Vegetarian'], 
                 image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_54.jpg',
                 nutrition: { Prep: '10 mins', Cook: '0 mins', Kcal: 134, Fats: 8, Carbs: 12, Protein: 5, Fibre: 3 },
                 storage: 'Store in the refrigerator for up to 5 days.'
-            }
+            },
+            { 
+                id: 'r14', name: 'Carrot Cake Muffins With Cashew Icing', category: 'Snack', 
+                ingredients: [{ name: 'Carrots, grated', quantity: '1 cup' }, { name: 'Flour', quantity: '1 cup' }, { name: 'Eggs', quantity: '2' }, { name: 'Cashews', quantity: '1/4 cup' }, { name: 'Cream Cheese', quantity: '2 tbsp' }, { name: 'Baking Powder', quantity: '1 tsp' }], 
+                instructions: '1. Combine wet and dry ingredients for muffins. Stir in grated carrots. 2. Fill muffin cups and bake at 180°C for 20 minutes. 3. Blend cashews and cream cheese for icing. Top muffins when cool.', 
+                tags: ['Contains Nuts', 'Vegetarian'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_52.jpg',
+                nutrition: { Prep: '15 mins', Cook: '20 mins', Kcal: 250, Fats: 15, Carbs: 25, Protein: 6, Fibre: 3 },
+                storage: 'Store in an airtight container for up to 3 days.'
+            },
+            { 
+                id: 'r15', name: 'Blackberry & Vanilla Linseed Pudding', category: 'Snack', 
+                ingredients: [{ name: 'Linseeds (Flaxseeds)', quantity: '2 tbsp' }, { name: 'Blackberries, frozen', quantity: '1 cup' }, { name: 'Vanilla Extract', quantity: '1 tsp' }, { name: 'Milk', quantity: '1/2 cup' }, { name: 'Sweetener', quantity: 'to taste' }], 
+                instructions: '1. Blend blackberries, milk, and vanilla extract until smooth. 2. Stir in linseeds and sweetener. 3. Pour into a glass and refrigerate overnight until thickened. 4. Serve with fresh berries.', 
+                tags: ['Quick', 'Gluten Free', 'Vegetarian', 'Dairy Free'], 
+                image: 'https://homeworkoutfactory.com/wp-content/uploads/2025/10/Screenshot_53.jpg',
+                nutrition: { Prep: '5 mins', Cook: '0 mins', Kcal: 200, Fats: 10, Carbs: 25, Protein: 5, Fibre: 8 },
+                storage: 'Store in the refrigerator for up to 2 days.'
+            },
+            { 
+                id: 'r16', name: 'Rocket & Soft Scrambled Eggs Breakfast Salad', category: 'Breakfast', 
+                ingredients: [{ name: 'rocket', quantity: '2 cups (60g)' }, { name: 'olive oil', quantity: '2 tsp.' }, { name: 'lemon juice', quantity: '2 tbsp.' }, { name: 'feta cheese', quantity: '¼ cup (40g), crumbled' }, { name: 'avocado', quantity: '½, cubed' }, { name: 'eggs', quantity: '4' }, { name: 'salt & pepper', quantity: 'to taste' }, { name: 'butter', quantity: '1 tbsp.' }, { name: 'cayenne pepper', quantity: 'to taste' }], 
+                instructions: '1. Place the rocket in a bowl with the olive oil and lemon juice and toss to combine. Mix in the feta and avocado and divide between two bowls. 2. Heat the butter in a non-stick skillet over a medium heat. Whisk the eggs in a small bowl and season with salt and pepper. Once the butter has melted add the eggs to the pan and cook until a thin layer of cooked egg appears around the edge of the skillet. Using a rubber spatula, push the eggs around the skillet until they are fluffy and just set, this takes around 2 minutes. Take the eggs off the heat to stop them overcooking. 3. Divide the eggs between the two salad bowls and sprinkle over a pinch of cayenne pepper.', 
+                tags: ['GF', 'LC', 'V', 'Q'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_124.jpg',
+                nutrition: { Prep: '10 mins', Cook: '5 mins', Kcal: 237, Fats: 22, Carbs: 8, Protein: 5, Fibre: 4 },
+                storage: ''
+            },
+            { 
+                id: 'r17', name: 'High Protein Breakfast Pizza', category: 'Breakfast', 
+                ingredients: [{ name: 'coconut oil', quantity: '½ tsp.' }, { name: 'egg', quantity: '1' }, { name: 'egg whites', quantity: '5' }, { name: 'coconut flour', quantity: '1 tbsp.' }, { name: 'zucchini (courgette), grated', quantity: '¼ cup (30g)' }, { name: 'herbs de provence (mixed herbs)', quantity: 'to taste' }, { name: 'salt & pepper', quantity: 'to taste' }, { name: 'tomato sauce (passata)', quantity: '⅓ cup (80ml)' }, { name: 'Parmesan cheese, grated', quantity: '2 tsp.' }], 
+                instructions: '1. Heat the oil in a 9-inch non-stick skillet over a medium heat. 2. In a bowl, whisk together the egg, egg whites, grated zucchini, coconut flour, herbs and season to taste with salt and pepper. Pour the egg mixture into the skillet, cover with a lid and cook gently until the eggs are set. 3. Serve immediately, topped with the tomato sauce and Parmesan cheese.', 
+                tags: ['GF', 'LC', 'MP', 'HP', 'V', 'Q'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_1.jpg',
+                nutrition: { Prep: '10 mins', Cook: '5 mins', Kcal: 262, Fats: 10, Carbs: 13, Protein: 29, Fibre: 5 },
+                storage: ''
+            },
+            { 
+                id: 'r18', name: 'Cinnamon Granola', category: 'Treat', 
+                ingredients: [{ name: 'coconut oil, melted', quantity: '½ cup (120ml)' }, { name: 'honey', quantity: '3 tbsp.' }, { name: 'apple sauce, unsweetened', quantity: '3 tbsp.' }, { name: 'rolled oats', quantity: '1 ½ cup (225g)' }, { name: 'almonds, chopped', quantity: '¼ cup (30g)' }, { name: 'Brazil nuts, chopped', quantity: '5' }, { name: 'sunflower seeds', quantity: '¼ cup (35g)' }, { name: 'chia seeds', quantity: '2 tbsp.' }, { name: 'ground cinnamon', quantity: '1 tbsp.' }, { name: 'salt', quantity: '¼ tsp.' }], 
+                instructions: '1. Preheat the oven to 350°F (180°C). Line a baking sheet with baking paper. 2. Combine all the wet ingredients together in a large bowl. Now add the dry ingredients and mix well with a spatula until all the ingredients are well combined. 3. Pour the granola mixture onto the baking sheet, place the tray in the oven and bake for 25-30 minutes until golden brown. Remove the tray from the oven half way through and give the granola a stir, before returning the tray to the oven. 4. Remove the baking sheet from the oven and set it aside to cool completely, before breaking up the granola and placing it in an airtight storage container. Keep in a cool place for up to 2 weeks.', 
+                tags: ['DF', 'MP', 'V', 'N'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_2.jpg',
+                nutrition: { Prep: '5 mins', Cook: '30 mins', Kcal: 226, Fats: 15, Carbs: 20, Protein: 4, Fibre: 4 },
+                storage: 'Keep in a cool place for up to 2 weeks.'
+            },
+            { 
+                id: 'r19', name: 'Grapefruit Breakfast Pots', category: 'Breakfast', 
+                ingredients: [{ name: 'grapefruit', quantity: '1, peeled and segmented, retain juice' }, { name: 'quark', quantity: '2 cups (490g)' }, { name: 'Greek yogurt', quantity: '1 cup (240g)' }, { name: 'honey', quantity: '4 tbsp.' }, { name: 'cinnamon granola', quantity: '2 servings' }], 
+                instructions: '1. When segmenting the grapefruit, preserve 2 tablespoons of the grapefruit juice. 2. Mix the quark, Greek yogurt, grapefruit juice and 2 tablespoons of honey together in a bowl. 3. Divide the granola between 4 glasses and spoon over the yogurt mix. To serve, top with the grapefruit segments and drizzle over the remaining honey.', 
+                tags: ['HP', 'V', 'Q', 'N'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_3.jpg',
+                nutrition: { Prep: '15 mins', Cook: '0 mins', Kcal: 319, Fats: 9, Carbs: 40, Protein: 22, Fibre: 1 },
+                storage: ''
+            },
+            { 
+                id: 'r20', name: 'Zucchini, Potato & Feta Soup', category: 'Lunch', 
+                ingredients: [{ name: 'olive oil', quantity: '1 tbsp.' }, { name: 'butter', quantity: '1 tbsp.' }, { name: 'yellow onion, diced', quantity: '1' }, { name: 'potatoes, peeled, cubed', quantity: '4 medium' }, { name: 'garlic clove, minced', quantity: '1' }, { name: 'vegetable broth (stock)', quantity: '6 ½ cups (1.5L)' }, { name: 'ground turmeric', quantity: '⅓ tsp.' }, { name: 'salt & pepper', quantity: 'to taste' }, { name: 'zucchinis (courgettes)', quantity: '2 medium' }, { name: 'fresh dill, chopped', quantity: '2 tbsp.' }, { name: 'single cream', quantity: '⅓ cup (80ml)' }, { name: 'feta cheese, cubed', quantity: '7 oz. (200g)' }], 
+                instructions: '1. Heat the oil and butter together in a pot over a medium heat. Add the onion and cook until softened, stirring often, for around 5 minutes. 2. Add the potatoes to the pot and cook for a further 2-3 minutes, stirring constantly. Next add garlic and pour in the vegetable broth. Bring to the boil and add the turmeric and season to taste with salt and pepper. 3. Finally, add the zucchini, bring to a boil and then lower the heat and simmer gently for 10 minutes. Once the potatoes have softened take the pot off the heat. 4. Now stir through the dill and cream, spoon into bowls and serve with the feta cheese.', 
+                tags: ['GF', 'MP', 'V'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_4.jpg',
+                nutrition: { Prep: '15 mins', Cook: '20 mins', Kcal: 286, Fats: 14, Carbs: 33, Protein: 9, Fibre: 4 },
+                storage: ''
+            },
+            { 
+                id: 'r21', name: 'Nutritious Grapefruit & Couscous Salad', category: 'Lunch', 
+                ingredients: [{ name: 'vegetable broth (stock)', quantity: '¾ cup (180ml)' }, { name: 'couscous, uncooked', quantity: '¾ cup (130g)' }, { name: 'avocado, cubed', quantity: '1' }, { name: 'grapefruits, segmented', quantity: '2' }, { name: 'cannellini beans', quantity: '14 oz. (400g) can, drained & rinsed' }, { name: 'feta cheese, crumbled', quantity: '½ cup (75g)' }, { name: 'fresh mint, chopped', quantity: '3 tbsp.' }, { name: 'fresh cilantro, chopped', quantity: '3 tbsp.' }, { name: 'lemon juice', quantity: '3 tbsp.' }, { name: 'grapefruit juice', quantity: '2 tbsp.' }, { name: 'honey', quantity: '1 tbsp.' }, { name: 'olive oil', quantity: '2 tbsp.' }, { name: 'salt', quantity: '¼ tsp.' }, { name: 'ground black pepper', quantity: 'to taste' }], 
+                instructions: '1. Pour the vegetable broth into a small pot and bring to the boil over a medium high heat. Add the couscous, stir through and remove the pot from the heat. Cover the pot with a lid and set aside for 5 minutes. After 5 minutes, fluff the couscous with a fork and set aside. 2. Make the dressing by placing all the dressing ingredients together in a bowl and whisking until well combined. 3. Place the beans, couscous, avocados, grapefruit, feta, mint, and cilantro into a large bowl. Pour over the salad dressing and toss gently.', 
+                tags: ['MP', 'V', 'Q'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_5.jpg',
+                nutrition: { Prep: '15 mins', Cook: '5 mins', Kcal: 441, Fats: 20, Carbs: 59, Protein: 12, Fibre: 11 },
+                storage: ''
+            },
+            { 
+                id: 'r22', name: 'Zucchini & Millet Burgers', category: 'Lunch', 
+                ingredients: [{ name: 'zucchini (courgette), grated', quantity: '1 medium' }, { name: 'millet', quantity: '⅓ cup (70g)' }, { name: 'carrot, grated', quantity: '1' }, { name: 'vegetable broth (stock)', quantity: '1 cup (250ml)' }, { name: 'small onion, grated', quantity: '1' }, { name: 'garlic, minced', quantity: '1 clove' }, { name: 'eggs', quantity: '2' }, { name: 'breadcrumbs', quantity: '8 tbsp.' }, { name: 'parsley, chopped', quantity: '1 tbsp.' }, { name: 'dill, chopped', quantity: '1 tbsp.' }, { name: 'olive oil', quantity: '2 tbsp.' }, { name: 'salt & pepper', quantity: 'to taste' }], 
+                instructions: '1. Cut the zucchini into quarters, lengthwise, remove the core and discard the seeds. Now grate the zucchini into a large bowl and set aside. 2. Place a small pot over a medium-high heat. Add the millet and grated carrot, pour in the broth, cover and bring to a boil. Reduce heat and simmer 15 minutes until liquid is absorbed. Set aside to cool. 3. Drain any juices from the zucchini, grate in the onion and add garlic. Add 3 tbsp breadcrumb and mix. Add cooled millet/carrot, parsley and dill. 4. Beat eggs with salt and pepper. Place remaining breadcrumbs on a plate. 5. Form 6 burgers. Dip in egg then breadcrumbs. 6. Fry burgers in olive oil 5 minutes each side until golden brown.', 
+                tags: ['DF', 'MP', 'V'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_6.jpg',
+                nutrition: { Prep: '15 mins', Cook: '35 mins', Kcal: 327, Fats: 15, Carbs: 39, Protein: 11, Fibre: 5 },
+                storage: ''
+            },
+            { 
+                id: 'r23', name: 'Simple Shredded Chicken 2 Ways', category: 'Lunch', 
+                ingredients: [{ name: 'chicken breasts', quantity: '4 (500g/1.1 lb)' }, { name: 'chicken stock', quantity: '1 cup (250ml)' }, { name: 'salt', quantity: '½ tsp' }, { name: 'ground pepper', quantity: '¼ tsp.' }, { name: 'olive oil', quantity: '2 tbsp.' }], 
+                instructions: 'Slow Cooked: 1. Season the chicken breasts with salt and pepper and place in the slow cooker. Pour over the stock, place the lid on and cook on low for 3-4 hours. 2. Once cooked, remove the chicken breasts and shred using two forks. Oven Baked: 1. Preheat the oven to 350°F (180°C). Line a baking sheet with baking paper. 2. Place chicken on the sheet, drizzle with olive oil, season and bake 25-35 minutes. 3. Rest 10-15 minutes then shred.', 
+                tags: ['GF', 'DF', 'LC', 'MP', 'HP'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_7.jpg',
+                nutrition: { Prep: '5 mins', Cook: '35 mins', Kcal: 211, Fats: 10, Carbs: 0, Protein: 28, Fibre: 0 },
+                storage: 'Store in an airtight container in the refrigerator for up to 5 days.'
+            },
+            { 
+                id: 'r24', name: 'Indonesian Chicken Salad', category: 'Lunch', 
+                ingredients: [{ name: 'simple shredded chicken', quantity: '4 servings' }, { name: 'green onions, sliced', quantity: '1 bunch' }, { name: 'fresh mint, chopped', quantity: '4 tbsp.' }, { name: 'fresh cilantro, chopped', quantity: '4 tbsp.' }, { name: 'red bell pepper, sliced', quantity: '1' }, { name: 'mung bean sprouts', quantity: '2 cups (70g)' }, { name: 'roasted peanuts, chopped', quantity: '4 tbsp.' }, { name: 'lime juice', quantity: '4 tbsp.' }, { name: 'root ginger, grated', quantity: '2 tsp.' }, { name: 'garlic, minced', quantity: '1 clove' }, { name: 'fish sauce', quantity: '1 tbsp.' }, { name: 'crunchy peanut butter', quantity: '2 tbsp.' }, { name: 'Greek yogurt', quantity: '4 tbsp.' }, { name: 'red chilis, chopped', quantity: '2' }], 
+                instructions: '1. Place all salad ingredients except peanuts into a large bowl and toss. 2. Mix dressing ingredients in a small bowl. 3. Pour dressing over salad, stir well, and scatter peanuts on top.', 
+                tags: ['GF', 'LC', 'MP', 'HP', 'Q', 'N'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_8.jpg',
+                nutrition: { Prep: '15 mins', Cook: '0 mins', Kcal: 309, Fats: 13, Carbs: 13, Protein: 37, Fibre: 5 },
+                storage: ''
+            },
+            { 
+                id: 'r25', name: 'Korean Style Salmon', category: 'Dinner', 
+                ingredients: [{ name: 'salmon fillets, skin removed', quantity: '1.5 lbs. (700g)' }, { name: 'tamari', quantity: '2 tbsp.' }, { name: 'lemon juice', quantity: '2 tbsp.' }, { name: 'olive oil', quantity: '2 tsp.' }, { name: 'honey', quantity: '2 tsp.' }, { name: 'sweet chili sauce', quantity: '6 tbsp.' }, { name: 'soy sauce', quantity: '4 tbsp.' }, { name: 'tomato ketchup', quantity: '2 tbsp.' }, { name: 'sesame oil', quantity: '2 tsp.' }, { name: 'water', quantity: '6-12 tbsp.' }, { name: 'rice', quantity: '3 cups (480g)' }, { name: 'olive oil', quantity: '2 tbsp.' }, { name: 'eggplants', quantity: '2' }, { name: 'green onions', quantity: '4, sliced' }, { name: 'garlic, minced', quantity: '2 cloves' }, { name: 'sesame seeds', quantity: '2 tbsp.' }, { name: 'chili, chopped (optional)', quantity: '1' }], 
+                instructions: 'For the salmon: 1. Place the salmon into an ovenproof dish and drizzle with tamari, lemon juice, olive oil and honey. Marinate 30-60 minutes. 2. Bake at 480°F (250°C) for 15 minutes. 3. Cook rice. For the eggplant: 1. Slice the eggplant. 2. Sauté white part of onions 2-3 minutes, add eggplant and stir fry 10 minutes. 3. Add garlic, some green onion, and all sauce ingredients. Bring to boil. To serve: Place salmon on plates, brush with the sauce, sprinkle sesame seeds, serve with rice and eggplant.', 
+                tags: ['GF', 'DF', 'MP', 'HP'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_9.jpg',
+                nutrition: { Prep: '15 mins', Cook: '30 mins', Kcal: 571, Fats: 19, Carbs: 59, Protein: 43, Fibre: 9 },
+                storage: ''
+            },
+            { 
+                id: 'r26', name: 'Low Carb Baked Turkey Meatballs', category: 'Dinner', 
+                ingredients: [{ name: 'ground turkey breast', quantity: '2 lbs. (900g)' }, { name: 'mozzarella cheese, grated', quantity: '2 cups (230g)' }, { name: 'Parmesan cheese, grated', quantity: '½ cup (50g)' }, { name: 'egg', quantity: '1' }, { name: 'onion powder', quantity: '2 tsp.' }, { name: 'garlic, minced', quantity: '1 clove' }, { name: 'herbs de provence', quantity: '½ tsp.' }, { name: 'ground black pepper', quantity: '½ tsp.' }, { name: 'cayenne pepper', quantity: '½ tsp.' }, { name: 'chili flakes', quantity: '½ tsp.' }, { name: 'tomato sauce (passata)', quantity: '1 cup (250ml)' }, { name: 'fresh parsley, chopped', quantity: 'to taste' }], 
+                instructions: '1. Preheat the oven to 400°F (200°C). 2. Combine turkey, 1 cup mozzarella, Parmesan, egg, onion powder, garlic, herbs, black pepper, cayenne and chili flakes. 3. Form meatballs, place in a dish and bake 15-20 minutes. Drain grease. 4. Pour tomato sauce over meatballs, top with remaining mozzarella and bake 5-10 minutes.', 
+                tags: ['GF', 'LC', 'MP', 'HP'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_10.jpg',
+                nutrition: { Prep: '10 mins', Cook: '25 mins', Kcal: 379, Fats: 23, Carbs: 3, Protein: 39, Fibre: 1 },
+                storage: ''
+            },
+            { 
+                id: 'r27', name: 'Coconut Fish Curry', category: 'Dinner', 
+                ingredients: [{ name: 'olive oil', quantity: '2 tbsp.' }, { name: 'red bell pepper, sliced', quantity: '1' }, { name: 'green bell pepper, sliced', quantity: '1' }, { name: 'onion, sliced', quantity: '1' }, { name: 'salt & pepper', quantity: 'to taste' }, { name: 'curry powder', quantity: '1 ½ tbsp.' }, { name: 'garlic cloves, minced', quantity: '2' }, { name: 'root ginger, grated', quantity: '1 tbsp.' }, { name: 'cod, frozen', quantity: '1.5 lbs. (680g)' }, { name: 'coconut milk', quantity: '14 oz. (400ml)' }, { name: 'lime, juice', quantity: '1' }, { name: 'green onions, sliced', quantity: '4' }, { name: 'fresh cilantro, chopped', quantity: 'to taste' }], 
+                instructions: '1. Heat olive oil in a pot over medium-high heat. Add peppers and onion, season, and sauté 4-5 minutes. 2. Add curry powder, cook 1 minute. Add garlic and ginger, cook 30 seconds. 3. Place cod on vegetables and pour coconut milk over. 4. Cover, bring to a boil, then simmer 20 minutes. 5. Adjust seasoning, add lime juice, garnish with green onions and cilantro.', 
+                tags: ['GF', 'DF', 'LC', 'MP', 'HP'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_11.jpg',
+                nutrition: { Prep: '10 mins', Cook: '25 mins', Kcal: 422, Fats: 27, Carbs: 11, Protein: 33, Fibre: 3 },
+                storage: ''
+            },
+            { 
+                id: 'r28', name: 'Vanilla Peach Muffins', category: 'Breakfast', 
+                ingredients: [{ name: 'peach, chopped', quantity: '1 medium' }, { name: 'ground almonds', quantity: '1 ½ cups (140g)' }, { name: 'coconut flour', quantity: '2 ½ tbsp.' }, { name: 'ground cinnamon', quantity: '1 tsp.' }, { name: 'baking soda', quantity: '½ tsp.' }, { name: 'salt', quantity: '¼ tsp.' }, { name: 'eggs, beaten', quantity: '2' }, { name: 'honey', quantity: '4 tbsp.' }, { name: 'coconut oil, melted', quantity: '2 tbsp.' }, { name: 'vanilla extract', quantity: '2 tsp.' }], 
+                instructions: '1. Preheat the oven to 350°F (180°C). Line a muffin tin with muffin liners. 2. Mix dry ingredients in one bowl and wet ingredients in another. 3. Fold wet into dry, add peach. 4. Spoon into 12 cases and bake 20-25 minutes until golden. 5. Cool 10 minutes before removing from liners.', 
+                tags: ['GF', 'DF', 'LC', 'MP', 'V', 'N'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_12.jpg',
+                nutrition: { Prep: '10 mins', Cook: '25 mins', Kcal: 137, Fats: 10, Carbs: 10, Protein: 4, Fibre: 2 },
+                storage: ''
+            },
+            { 
+                id: 'r29', name: 'Healthy Apple Cake', category: 'Treat', 
+                ingredients: [{ name: 'walnuts, chopped', quantity: '¼ cup (30g)' }, { name: 'ground cinnamon', quantity: 'to garnish' }, { name: 'chai spice', quantity: '1 ½ tsp.' }, { name: 'white whole wheat flour', quantity: '1 ½ cups (190g)' }, { name: 'coconut sugar', quantity: '½ cup (100g)' }, { name: 'baking powder', quantity: '½ tsp.' }, { name: 'baking soda', quantity: '½ tsp.' }, { name: 'chai spice', quantity: '1 ½ tsp.' }, { name: 'salt', quantity: '⅛ tsp.' }, { name: 'apples, grated', quantity: '2 small' }, { name: 'unsweetened applesauce', quantity: '1 cup (250g)' }, { name: 'eggs', quantity: '2 large' }, { name: 'Greek yogurt', quantity: '4 tbsp.' }, { name: 'vanilla extract', quantity: '1 tsp.' }, { name: 'unsweetened almond milk', quantity: '½ cup (120ml)' }, { name: 'maple syrup', quantity: '½ cup (120ml)' }, { name: 'melted coconut oil', quantity: '2 tbsp.' }, { name: 'cream cheese', quantity: '½ cup (115g)' }, { name: 'fat free Greek yogurt', quantity: '½ cup (120g)' }, { name: 'maple syrup', quantity: '2 tbsp.' }], 
+                instructions: '1. Preheat oven to 350°F (180°C). Line an 8×12-inch pan with baking paper. 2. Mix dry ingredients in a bowl. 3. Mix wet ingredients except coconut oil. Fold dry into wet. 4. Add melted coconut oil, pour into pan and bake 35 minutes. 5. Whip frosting ingredients. 6. Cool cake completely, spread frosting, garnish with cinnamon and walnuts.', 
+                tags: ['MP', 'V', 'N'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_13.jpg',
+                nutrition: { Prep: '20 mins', Cook: '30 mins', Kcal: 223, Fats: 8, Carbs: 36, Protein: 4, Fibre: 3 },
+                storage: ''
+            },
+            { 
+                id: 'r30', name: 'Hazelnut Granola Bars', category: 'Treat', 
+                ingredients: [{ name: 'rolled oats', quantity: '2 cups (300g)' }, { name: 'puffed quinoa', quantity: '1 cup (30g)' }, { name: 'honey', quantity: '½ cup (120ml)' }, { name: 'coconut oil, melted', quantity: '⅓ cup (80ml)' }, { name: 'sea salt', quantity: '¼ tsp.' }, { name: 'vanilla extract', quantity: '½ tsp.' }, { name: 'chopped hazelnuts', quantity: '¼ cup (30g)' }], 
+                instructions: '1. Line an 8×8-inch baking pan with baking paper. 2. Combine oats, quinoa and half the hazelnuts. 3. Heat honey and coconut oil until bubbling, remove from heat and add salt and vanilla. 4. Mix wet into dry ingredients. 5. Press mixture into pan, top with remaining hazelnuts and press. 6. Refrigerate 2 hours, slice into bars.', 
+                tags: ['DF', 'MP', 'V', 'N'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_14.jpg',
+                nutrition: { Prep: '10 mins', Cook: '3 mins', Kcal: 258, Fats: 11, Carbs: 37, Protein: 5, Fibre: 3 },
+                storage: 'Store in an airtight container in the refrigerator for up to 1 week.'
+            },
+            { 
+                id: 'r31', name: 'High Protein Baked Oatmeal', category: 'Breakfast', 
+                ingredients: [
+                    { name: 'Rolled Oats', quantity: '½ cup (40g)' }, 
+                    { name: 'Banana', quantity: '½' }, 
+                    { name: 'Almond Milk, unsweetened', quantity: '½ cup (120ml)' }, 
+                    { name: 'Maple Syrup', quantity: '1 tbsp' }, 
+                    { name: 'Vanilla Protein Powder', quantity: '1 tbsp' }, 
+                    { name: 'Baking Powder', quantity: '½ tsp' },
+                    { name: 'Raspberries (topping)', quantity: '¼ cup (30g)' },
+                    { name: 'Vegan Chocolate Chips (topping)', quantity: '1 tbsp' },
+                    { name: 'Peanut Butter, natural (topping)', quantity: '1 tbsp' }
+                ], 
+                instructions: '1. Preheat the oven to 350°F (180°C). 2. Blend all ingredients except toppings until smooth. 3. Transfer to an oven dish and add toppings. 4. Bake 25–30 minutes until golden, drizzle peanut butter and serve.', 
+                tags: ['Dairy Free', 'Meal Prep', 'Vegetarian', 'Contains Nuts'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_15.jpg',
+                nutrition: { Prep: '5 mins', Cook: '30 mins', Kcal: 469, Fats: 17, Carbs: 70, Protein: 12, Fibre: 9 },
+                storage: 'Store in the refrigerator for up to 3 days.'
+            }, 
+            { 
+                id: 'r32', name: 'Raspberry Protein Smoothie', category: 'Smoothie', 
+                ingredients: [
+                    { name: 'Banana', quantity: '1' }, 
+                    { name: 'Frozen Raspberries', quantity: '1 cup (125g)' }, 
+                    { name: 'Vanilla Protein Powder', quantity: '½ scoop (12g)' }, 
+                    { name: 'Cashew Nuts', quantity: '2 tbsp' }, 
+                    { name: 'Almond Milk, unsweetened', quantity: '½ cup (120ml)' }
+                ], 
+                instructions: '1. Blend all ingredients until smooth. 2. Serve immediately.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Vegetarian', 'Quick', 'Contains Nuts'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_16.jpg',
+                nutrition: { Prep: '5 mins', Cook: '0 mins', Kcal: 326, Fats: 10, Carbs: 49, Protein: 16, Fibre: 9 },
+                storage: 'Best served immediately.'
+            }, 
+            { 
+                id: 'r33', name: 'Chickpea & Avocado Toast', category: 'Breakfast', 
+                ingredients: [
+                    { name: 'Chickpeas, drained', quantity: '1 cup (165g)' },
+                    { name: 'Olive Oil', quantity: '1 tbsp' },
+                    { name: 'Salt', quantity: '¼ tsp' },
+                    { name: 'Black Pepper', quantity: '¼ tsp' },
+                    { name: 'Ground Cumin', quantity: '1 tsp' },
+                    { name: 'Avocado', quantity: '1' },
+                    { name: 'Tahini', quantity: '1 tbsp' },
+                    { name: 'Lemon Juice', quantity: '½ lemon' },
+                    { name: 'Bread, toasted', quantity: '2 slices' },
+                    { name: 'Fresh Parsley, chopped', quantity: '2 tbsp' }
+                ], 
+                instructions: '1. Roast chickpeas with olive oil, cumin, salt and pepper at 390°F (200°C) for 15–20 minutes. 2. Mash avocado with lemon juice and tahini. 3. Spread avocado on toast, top with chickpeas and parsley.', 
+                tags: ['Dairy Free', 'Vegetarian'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_17.jpg',
+                nutrition: { Prep: '10 mins', Cook: '20 mins', Kcal: 484, Fats: 30, Carbs: 46, Protein: 13, Fibre: 15 },
+                storage: 'Best eaten fresh. Roasted chickpeas can be stored 3 days.'
+            }, 
+            { 
+                id: 'r34', name: 'Breakfast Pancakes With Harissa Roasted Veggies', category: 'Breakfast', 
+                ingredients: [
+                    { name: 'Buckwheat Flour', quantity: '1¼ cup (150g)' },
+                    { name: 'Chili Powder', quantity: '1 tsp' },
+                    { name: 'Paprika', quantity: '1 tsp' },
+                    { name: 'Water', quantity: '1 cup (240ml)' },
+                    { name: 'Olive Oil', quantity: '4 tsp' },
+                    { name: 'Eggplant, chopped', quantity: '1' },
+                    { name: 'Zucchini, chopped', quantity: '1 small' },
+                    { name: 'Chickpeas, drained', quantity: '1 can (400g)' },
+                    { name: 'Paprika', quantity: '1 tsp' },
+                    { name: 'Tomatoes, chopped', quantity: '2 large' },
+                    { name: 'Harissa Paste', quantity: '1 tbsp' },
+                    { name: 'Tahini', quantity: '1 tbsp' },
+                    { name: 'Lemon Juice', quantity: '1 lemon' },
+                    { name: 'Fresh Parsley, chopped', quantity: '2 tbsp' }
+                ], 
+                instructions: '1. Roast veggies with spices at 375°F (190°C) for 25 minutes, add tomatoes and roast 10 more minutes. 2. Mix pancake batter and cook 4 pancakes. 3. Mix roasted vegetables with harissa, tahini and lemon. 4. Serve veggies over pancakes.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Meal Prep', 'Vegetarian'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_18.jpg',
+                nutrition: { Prep: '15 mins', Cook: '45 mins', Kcal: 340, Fats: 10, Carbs: 55, Protein: 14, Fibre: 15 },
+                storage: 'Store vegetables and pancakes separately up to 3 days.'
+            }, 
+            { 
+                id: 'r35', name: 'Healthy Homemade Ketchup', category: 'Condiment', 
+                ingredients: [
+                    { name: 'Tomato Sauce (Passata)', quantity: '1 cup (240g)' },
+                    { name: 'Apple Cider Vinegar', quantity: '¼ cup (60ml)' },
+                    { name: 'Ground Allspice', quantity: '⅛ tsp' },
+                    { name: 'Ground Cloves', quantity: '⅛ tsp' },
+                    { name: 'Ground Cinnamon', quantity: '¼ tsp' },
+                    { name: 'Maple Syrup', quantity: '1 tbsp' },
+                    { name: 'Sea Salt', quantity: '1 tsp' },
+                    { name: 'Black Pepper', quantity: '¼ tsp' }
+                ], 
+                instructions: '1. Simmer all ingredients on low for 10 minutes. Add water if needed. 2. Store in a glass jar and refrigerate up to one month.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Low Carb', 'Meal Prep', 'Vegetarian', 'Quick'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_19.jpg',
+                nutrition: { Prep: '5 mins', Cook: '10 mins', Kcal: 14, Fats: 0, Carbs: 3, Protein: 0, Fibre: 1 },
+                storage: 'Store in the refrigerator for up to 1 month.'
+            }, 
+            { 
+                id: 'r36', name: 'Baked Zucchini Sticks', category: 'Snack', 
+                ingredients: [
+                    { name: 'Zucchini', quantity: '1' },
+                    { name: 'Chickpea Flour', quantity: '1 cup (90g)' },
+                    { name: 'Almond Milk, unsweetened', quantity: '¾ cup (180ml)' },
+                    { name: 'Cornstarch', quantity: '½ cup (65g)' },
+                    { name: 'Cornflakes, crushed', quantity: '½ cup (30g)' },
+                    { name: 'Garlic Granules', quantity: '1 tsp' },
+                    { name: 'Salt & Pepper', quantity: 'to taste' }
+                ], 
+                instructions: '1. Cut zucchini into sticks. 2. Mix batter with chickpea flour, cornstarch, milk and spices. 3. Coat in batter then cornflakes. 4. Bake at 400°F (200°C) for 25 minutes.', 
+                tags: ['Dairy Free', 'Meal Prep', 'Vegetarian'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_20.jpg',
+                nutrition: { Prep: '5 mins', Cook: '25 mins', Kcal: 382, Fats: 5, Carbs: 69, Protein: 13, Fibre: 9 },
+                storage: 'Store for 2 days. Reheat in oven for crispiness.'
+            }, 
+            { 
+                id: 'r37', name: 'Watermelon Poke Bowl', category: 'Lunch', 
+                ingredients: [
+                    { name: 'Watermelon, cubed', quantity: '2 cups (300g)' },
+                    { name: 'Tamari Sauce', quantity: '6 tbsp' },
+                    { name: 'Rice Vinegar', quantity: '2 tsp' },
+                    { name: 'Sesame Oil', quantity: '1 tbsp' },
+                    { name: 'Lime Juice', quantity: '1 lime' },
+                    { name: 'Maple Syrup', quantity: '1 tbsp' },
+                    { name: 'Green Onions, sliced', quantity: '2' },
+                    { name: 'Ginger, grated', quantity: '2 tbsp' },
+                    { name: 'Sesame Seeds', quantity: '2 tbsp' },
+                    { name: 'Chili Flakes', quantity: '1 tsp' },
+                    { name: 'Soy Yogurt', quantity: '3 tbsp' },
+                    { name: 'Sriracha Sauce', quantity: '1 tbsp' },
+                    { name: 'Cooked Rice', quantity: '9 oz (250g)' },
+                    { name: 'Cucumber, sliced', quantity: '½' },
+                    { name: 'Avocado, sliced', quantity: '1' },
+                    { name: 'Edamame Beans', quantity: '½ cup (60g)' },
+                    { name: 'Nori, chopped', quantity: '1 tbsp' },
+                    { name: 'Black Sesame Seeds', quantity: '1 tbsp' }
+                ], 
+                instructions: '1. Mix marinade ingredients and marinate watermelon 1 hour. 2. Mix yogurt and sriracha. 3. Assemble bowls with rice, watermelon, vegetables and sauce.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Meal Prep', 'Vegetarian'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_21.jpg',
+                nutrition: { Prep: '20 mins', Cook: '0 mins', Kcal: 373, Fats: 16, Carbs: 51, Protein: 10, Fibre: 6 },
+                storage: 'Store ingredients separately for 2 days.'
+            }, 
+            { 
+                id: 'r38', name: 'Chickpea & Couscous Salad', category: 'Lunch', 
+                ingredients: [
+                    { name: 'Couscous', quantity: '½ cup (85g)' },
+                    { name: 'Chickpeas, drained', quantity: '1 can (400g)' },
+                    { name: 'Cucumber, sliced', quantity: '½' },
+                    { name: 'Red Onion, diced', quantity: '½' },
+                    { name: 'Cherry Tomatoes, halved', quantity: '1 cup (150g)' },
+                    { name: 'Rocket Leaves', quantity: '7 oz (200g)' },
+                    { name: 'Hummus', quantity: '4 tbsp' },
+                    { name: 'Apple Cider Vinegar', quantity: '1 tbsp' },
+                    { name: 'Lemon Juice', quantity: '1 tbsp' },
+                    { name: 'Olive Oil', quantity: '1 tbsp' },
+                    { name: 'Maple Syrup', quantity: '1 tsp' },
+                    { name: 'Dijon Mustard', quantity: '1 tsp' }
+                ], 
+                instructions: '1. Cook couscous and cool. 2. Mix dressing. 3. Toss all salad ingredients with dressing. 4. Serve with hummus.', 
+                tags: ['Dairy Free', 'Meal Prep', 'Vegetarian', 'Quick'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_22.jpg',
+                nutrition: { Prep: '20 mins', Cook: '0 mins', Kcal: 351, Fats: 12, Carbs: 51, Protein: 10, Fibre: 10 },
+                storage: 'Store refrigerated for up to 2 days.'
+            }, 
+            { 
+                id: 'r39', name: 'Super Green Soup', category: 'Dinner', 
+                ingredients: [
+                    { name: 'Olive Oil', quantity: '1 tbsp' },
+                    { name: 'Garlic, minced', quantity: '2 cloves' },
+                    { name: 'Ground Cumin', quantity: '2 tsp' },
+                    { name: 'Vegetable Broth', quantity: '2½ cups (600ml)' },
+                    { name: 'Broccoli, in florets', quantity: '1 large head' },
+                    { name: 'Spinach', quantity: '7 oz (200g)' },
+                    { name: 'Cannellini Beans, drained', quantity: '1 can (400g)' },
+                    { name: 'Fresh Cilantro, chopped', quantity: '4 tbsp' },
+                    { name: 'Lemon Juice', quantity: '½ lemon' },
+                    { name: 'Oat Cream', quantity: '5 tbsp' }
+                ], 
+                instructions: '1. Cook garlic and cumin in oil. Add broth and broccoli and simmer 10 minutes. 2. Add remaining ingredients except cream and cook 10 minutes. 3. Blend smooth and serve with oat cream.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Low Carb', 'Meal Prep', 'Vegetarian', 'Quick'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_23.jpg',
+                nutrition: { Prep: '5 mins', Cook: '22 mins', Kcal: 181, Fats: 8, Carbs: 24, Protein: 8, Fibre: 7 },
+                storage: 'Store refrigerated for 3 days or freeze for 2 months.'
+            }, 
+            { 
+                id: 'r40', name: 'Smoky Tomato & Bean Stew', category: 'Dinner', 
+                ingredients: [
+                    { name: 'Garlic, minced', quantity: '2 cloves' },
+                    { name: 'Sundried Tomatoes', quantity: '½ cup (55g)' },
+                    { name: 'Smoked Paprika', quantity: '1 tsp' },
+                    { name: 'Cannellini Beans, drained', quantity: '1 can (400g)' },
+                    { name: 'Chopped Tomatoes, canned', quantity: '1 can (400g)' },
+                    { name: 'Maple Syrup', quantity: '1 tbsp' },
+                    { name: 'Cooked Rice', quantity: '3 cups (480g)' },
+                    { name: 'Lambs Lettuce', quantity: '4 handfuls' },
+                    { name: 'Soy Yogurt', quantity: '4 tbsp' }
+                ], 
+                instructions: '1. Cook rice. 2. Sauté garlic and sundried tomatoes, add paprika. 3. Add beans, tomatoes and maple syrup; simmer 10 minutes. 4. Serve over rice with greens and yogurt.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Meal Prep', 'Vegetarian', 'Quick'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_24.jpg',
+                nutrition: { Prep: '5 mins', Cook: '15 mins', Kcal: 278, Fats: 1, Carbs: 59, Protein: 9, Fibre: 6 },
+                storage: 'Store up to 3 days in the refrigerator.'
+            }, 
+            { 
+                id: 'r41', name: 'Easy Vegan Nasi Goreng', category: 'Dinner', 
+                ingredients: [
+                    { name: 'Cooked Brown Rice', quantity: '2 cups (400g)' },
+                    { name: 'Coconut Oil', quantity: '1 tbsp' },
+                    { name: 'Onion, chopped', quantity: '1' },
+                    { name: 'Garlic, chopped', quantity: '2 cloves' },
+                    { name: 'Ginger, grated', quantity: '¾ inch (2cm)' },
+                    { name: 'Pak Choy, sliced', quantity: '1 small' },
+                    { name: 'Carrots, finely chopped', quantity: '2' },
+                    { name: 'Silken Tofu, crumbled', quantity: '10.5 oz (300g)' },
+                    { name: 'Tamari Sauce', quantity: '4 tbsp' },
+                    { name: 'Rice Vinegar', quantity: '2 tbsp' },
+                    { name: 'Peanuts, chopped', quantity: '¼ cup (36g)' },
+                    { name: 'Green Onions, sliced', quantity: '3' },
+                    { name: 'Cucumber, sliced', quantity: '½' },
+                    { name: 'Tomato, sliced', quantity: '1' }
+                ], 
+                instructions: '1. Sauté onion, garlic and ginger in coconut oil. 2. Add carrots and pak choy and cook. 3. Add rice, tofu, tamari and rice vinegar and fry 5 minutes. 4. Serve with peanuts, green onions, cucumber and tomato.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Meal Prep', 'Vegetarian', 'Quick', 'Contains Nuts'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_25.jpg',
+                nutrition: { Prep: '10 mins', Cook: '13 mins', Kcal: 287, Fats: 11, Carbs: 35, Protein: 14, Fibre: 4 },
+                storage: 'Store up to 3 days.'
+            }, 
+            { 
+                id: 'r42', name: 'Creamy Sundried Tomato Pasta', category: 'Dinner', 
+                ingredients: [
+                    { name: 'Pasta of Choice', quantity: '10.5 oz (300g)' },
+                    { name: 'Sundried Tomatoes, chopped', quantity: '½ cup (55g)' },
+                    { name: 'Garlic, minced', quantity: '2 cloves' },
+                    { name: 'Fresh Basil, chopped', quantity: '4 tbsp' },
+                    { name: 'Chili Flakes', quantity: '¼ tsp' },
+                    { name: 'Cashew Nuts', quantity: '1 cup (140g)' },
+                    { name: 'Almond Milk, unsweetened', quantity: '1½ cups (350ml)' },
+                    { name: 'Nutritional Yeast', quantity: '2 tbsp' },
+                    { name: 'Salt', quantity: '2 tsp' }
+                ], 
+                instructions: '1. Cook pasta. 2. Boil cashews 5 minutes and blend with sauce ingredients. 3. Sauté sundried tomatoes and garlic, add sauce and basil. 4. Mix in pasta and serve.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Meal Prep', 'Vegetarian', 'Quick', 'Contains Nuts'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_26.jpg',
+                nutrition: { Prep: '5 mins', Cook: '15 mins', Kcal: 551, Fats: 20, Carbs: 80, Protein: 16, Fibre: 8 },
+                storage: 'Store up to 3 days.'
+            }, 
+            { 
+                id: 'r43', name: 'Digestive Biscuits', category: 'Snack', 
+                ingredients: [
+                    { name: 'Oat Flour', quantity: '2.6 oz (75g)' },
+                    { name: 'White Rice Flour', quantity: '2.6 oz (75g)' },
+                    { name: 'Coconut Sugar', quantity: '6 tbsp' },
+                    { name: 'Baking Powder', quantity: '1 tsp' },
+                    { name: 'Salt', quantity: 'pinch' },
+                    { name: 'Ground Cardamom', quantity: '¼ tsp' },
+                    { name: 'Ground Cinnamon', quantity: '¼ tsp' },
+                    { name: 'Coconut Oil, melted', quantity: '2 tbsp' },
+                    { name: 'Oat Milk', quantity: '4 tbsp' }
+                ], 
+                instructions: '1. Preheat oven to 360°F (180°C). 2. Mix ingredients into dough and form 8 balls. Flatten. 3. Bake 12–15 minutes and cool on rack.', 
+                tags: ['Dairy Free', 'Meal Prep', 'Vegetarian', 'Quick'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_27.jpg',
+                nutrition: { Prep: '10 mins', Cook: '15 mins', Kcal: 94, Fats: 1, Carbs: 20, Protein: 2, Fibre: 1 },
+                storage: 'Store in an airtight container up to 5 days.'
+            }, 
+            { 
+                id: 'r44', name: '3-Ingredient Berry Mousse', category: 'Dessert', 
+                ingredients: [
+                    { name: 'Mixed Berries', quantity: '1½ cups (220g)' },
+                    { name: 'Silken Tofu', quantity: '14 oz (400g)' },
+                    { name: 'Maple Syrup', quantity: '2 tbsp' }
+                ], 
+                instructions: '1. Blend all ingredients until smooth. 2. Divide into glasses and chill 1 hour. 3. Serve with fresh berries.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Meal Prep', 'Vegetarian'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_28.jpg',
+                nutrition: { Prep: '5 mins', Cook: '0 mins', Kcal: 211, Fats: 5, Carbs: 26, Protein: 15, Fibre: 5 },
+                storage: 'Store refrigerated for up to 3 days.'
+            }, 
+            { 
+                id: 'r45', name: 'Vegan Banana Bread', category: 'Dessert', 
+                ingredients: [
+                    { name: 'Bananas, ripe', quantity: '2' },
+                    { name: 'Maple Syrup', quantity: '1 tbsp' },
+                    { name: 'Oat Flour', quantity: '¾ cup (67g)' },
+                    { name: 'Buckwheat Flour', quantity: '6 tbsp' },
+                    { name: 'Ground Cardamom', quantity: '½ tsp' },
+                    { name: 'Ground Cinnamon', quantity: '½ tsp' },
+                    { name: 'Baking Powder', quantity: '1¼ tsp' },
+                    { name: 'Salt', quantity: 'pinch' }
+                ], 
+                instructions: '1. Preheat oven to 350°F (170°C). 2. Blend bananas and syrup. 3. Mix dry ingredients and fold in banana mixture. 4. Bake 60–65 minutes until a toothpick comes out clean.', 
+                tags: ['Dairy Free', 'Low Carb', 'Meal Prep', 'Vegetarian'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/Screenshot_29.jpg',
+                nutrition: { Prep: '10 mins', Cook: '60 mins', Kcal: 70, Fats: 1, Carbs: 15, Protein: 2, Fibre: 2 },
+                storage: 'Store 4 days in refrigerator or freeze for 2 months.'
+            },
         ];
 
         let selectedRecipes = [];
-        let coverImageDataUrl = null;
+        let coverImageDataUrl = null; // For uploaded cover
         let selectedTags = new Set();
         let currentStep = 1;
 
-        // Initialize
+        // Initialization after DOM load
         document.addEventListener('DOMContentLoaded', () => {
             initializeFilters();
             setupCoverUpload();
+
+            // Setup event listeners for continue button
+            document.querySelector('#step1 button').addEventListener('click', continueFromCover);
+
+            // Render selected recipes initially
+            renderSelectedRecipes();
         });
 
+        // Setup for cover upload
         function setupCoverUpload() {
             document.getElementById('coverUpload').addEventListener('change', (e) => {
                 const file = e.target.files[0];
@@ -494,6 +944,9 @@
                         document.getElementById('coverPreviewContainer').classList.remove('hidden');
                     };
                     reader.readAsDataURL(file);
+                } else {
+                    coverImageDataUrl = null;
+                    document.getElementById('coverPreviewContainer').classList.add('hidden');
                 }
             });
         }
@@ -524,14 +977,14 @@
         function renderTagButtons() {
             const tagContainer = document.getElementById('tagButtonContainer');
             tagContainer.innerHTML = '';
-            
+
             CURATED_TAGS.forEach(tag => {
                 const button = document.createElement('button');
                 button.textContent = tag;
                 button.setAttribute('data-tag', tag);
                 button.onclick = () => toggleTagFilter(tag);
                 button.className = `tag-button px-3 py-1 rounded-full text-xs font-semibold transition duration-150 whitespace-nowrap`;
-                
+
                 if (selectedTags.has(tag)) {
                     button.classList.add('active');
                 }
@@ -601,13 +1054,17 @@
         }
 
         function goToStep2() {
-            if (!coverImageDataUrl) {
-                showNotification('Please upload a cover image first!', 'error');
-                return;
-            }
             currentStep = 2;
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('step3').classList.add('hidden');
+            updateStepIndicator();
+        }
+
+        function backToCover() {
+            currentStep = 1;
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.add('hidden');
             document.getElementById('step3').classList.add('hidden');
             updateStepIndicator();
         }
@@ -643,7 +1100,7 @@
 
         function renderSelectedRecipes() {
             const container = document.getElementById('selectedRecipesList');
-            
+
             if (selectedRecipes.length === 0) {
                 container.innerHTML = '<p class="text-slate-400 text-center py-8">No recipes selected yet</p>';
             } else {
@@ -675,7 +1132,7 @@
             const dietTag = MAJOR_DIETS[dietFilterValue];
 
             let available = RECIPES.filter(r => !selectedRecipes.find(s => s.id === r.id));
-            
+
             if (dietTag && dietFilterValue !== '') {
                 available = available.filter(r => r.tags.includes(dietTag));
             }
@@ -762,7 +1219,7 @@
                                     <div class="flex flex-col sm:flex-row gap-6">
                                         <div class="sm:w-1/3 space-y-4">
                                             <img src="${recipe.image}" alt="${recipe.name}" class="w-full h-auto rounded-lg shadow-lg"
-                                                onerror="this.onerror=null; this.src='https://placehold.co/300x200/cccccc/000000?text=Recipe';">
+                                                onerror="this.onerror=null; this.src='https://placehold.co/300x200/cccccc/000000?text=Recipe';" />
 
                                             <h4 class="text-xl font-bold text-teal-600 mb-2 border-b border-teal-300">INGREDIENTS</h4>
                                             <ul class="list-disc list-inside space-y-1 text-gray-700">
@@ -806,7 +1263,7 @@
         function showNotification(message, type) {
             const notificationArea = document.getElementById('notificationArea');
             const bgClass = type === 'error' ? 'bg-red-900 text-red-200 border-red-400' : 'bg-green-900 text-green-200 border-green-400';
-            
+
             notificationArea.innerHTML = `<div class="p-6 ${bgClass} rounded-xl shadow-2xl border">${message}</div>`;
             notificationArea.classList.remove('hidden');
             notificationArea.classList.add('flex');
@@ -815,6 +1272,15 @@
                 notificationArea.classList.add('hidden');
                 notificationArea.classList.remove('flex');
             }, 3000);
+        }
+
+        // Continue button handler on Step 1
+        function continueFromCover() {
+            if (!coverImageDataUrl) {
+                showNotification('Please upload a cover image first!', 'error');
+                return;
+            }
+            goToStep2();
         }
     </script>
 </body>
