@@ -216,7 +216,10 @@
                 <h2 class="text-2xl font-bold text-teal-400 mb-4">Step 2: Select Recipes</h2>
 
                 <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                    <select id="dietFilter" class="w-full sm:w-1/3 p-3 border border-slate-700 rounded-xl bg-slate-700 text-slate-200 focus:ring-teal-500">
+                    <select id="dietFilter" class="w-full sm:w-1/4 p-3 border border-slate-700 rounded-xl bg-slate-700 text-slate-200 focus:ring-teal-500">
+                    </select>
+                    <select id="categoryFilterAutoFill" class="w-full sm:w-1/4 p-3 border border-slate-700 rounded-xl bg-slate-700 text-slate-200 focus:ring-teal-500">
+                        <option value="">All Categories</option>
                     </select>
                     <input type="number" id="recipeCount" min="1" max="100" value="20" placeholder="Number of recipes"
                         class="w-full sm:w-1/4 p-3 border border-slate-700 rounded-xl bg-slate-700 text-slate-200 focus:ring-teal-500">
@@ -233,6 +236,14 @@
                     <span class="px-3 py-1 bg-blue-700 text-blue-200 rounded-full shadow-md">Selected: <span id="selectedCount">0</span></span>
                     <span class="px-3 py-1 bg-teal-700 text-teal-200 rounded-full shadow-md">Categories: <span id="categoryCount">0</span></span>
                 </div>
+            </div>
+
+            <!-- Search by Category Text -->
+            <div class="mb-6 p-6 bg-slate-800 rounded-xl shadow-xl">
+                <label for="categorySearchInput" class="block mb-2 text-teal-400 font-bold">Search Categories:</label>
+                <input type="text" id="categorySearchInput" placeholder="Enter category name to filter recipes"
+                    class="w-full p-3 border border-slate-700 rounded-xl bg-slate-700 text-slate-200 focus:ring-teal-500"
+                    oninput="filterRecipes()">
             </div>
 
             <!-- Selected Recipes List -->
@@ -913,6 +924,141 @@
                 nutrition: { Prep: '10 mins', Cook: '60 mins', Kcal: 70, Fats: 1, Carbs: 15, Protein: 2, Fibre: 2 },
                 storage: 'Store 4 days in refrigerator or freeze for 2 months.'
             },
+            { 
+                id: 'r46', name: 'Chunky Monkey Pancakes', category: 'Breakfast', 
+                ingredients: [{ name: 'Plain Greek yogurt', quantity: '1/4 cup (70g)' }, { name: 'Rolled oats', quantity: '1/2 cup (45g)' }, { name: 'Baking powder', quantity: '1/2 tsp' }, { name: 'Banana (mashed)', quantity: '1/2 medium' }, { name: 'Egg whites', quantity: '2' }, { name: 'Almond milk', quantity: '1–2 tbsp' }, { name: 'Vanilla extract', quantity: '1 tsp' }, { name: 'Coconut oil', quantity: '1 tsp' }, { name: 'Dark chocolate chips', quantity: '1 tbsp' }, { name: 'Peanut butter', quantity: '1 tbsp' }, { name: 'Banana', quantity: '1/2 medium' }, { name: 'Almond milk', quantity: '2 tbsp' }], 
+                instructions: '1. Blend all pancake ingredients until smooth. 2. Heat pan with coconut oil and cook pancakes for 3 minutes, flip and cook 2 minutes more. 3. Mash banana with peanut butter and almond milk to make sauce. 4. Serve over pancakes with chocolate chips.', 
+                tags: ['Vegetarian', 'Quick', 'Contains Nuts'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/cunkmonky.jpg',
+                nutrition: { Prep: '10 mins', Cook: '10 mins', Kcal: 543, Fats: 18, Carbs: 71, Protein: 24, Fibre: 8 },
+                storage: 'Best eaten immediately.'
+            },
+            { 
+                id: 'r47', name: 'Keto Egg Wraps', category: 'Breakfast', 
+                ingredients: [{ name: 'Coconut oil', quantity: '1 tsp' }, { name: 'Eggs', quantity: '2' }, { name: 'Spinach', quantity: '2 handfuls' }, { name: 'Cream cheese (reduced fat)', quantity: '2 tbsp' }, { name: 'Sundried tomatoes', quantity: '6' }, { name: 'Dried oregano', quantity: '1/2 tsp' }, { name: 'Feta (crumbled)', quantity: '1/4 cup (40g)' }, { name: 'Salt & pepper', quantity: 'To taste' }], 
+                instructions: '1. Cook each whisked egg in coconut oil to form thin wraps. 2. Wilt spinach. 3. Combine spinach with cream cheese, sundried tomatoes, oregano, salt and pepper. 4. Spread onto egg wraps, sprinkle with feta, and roll tightly.', 
+                tags: ['Gluten Free', 'Low Carb', 'Meal Prep', 'Vegetarian', 'Quick'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/ketoeggwrap.jpg',
+                nutrition: { Prep: '5 mins', Cook: '5 mins', Kcal: 218, Fats: 16, Carbs: 8, Protein: 12, Fibre: 2 },
+                storage: 'Refrigerate up to 2 days.'
+            },
+            { 
+                id: 'r48', name: 'Meal Prep Grain Breakfast Bowl', category: 'Breakfast', 
+                ingredients: [{ name: 'Lemon', quantity: '1' }, { name: 'Water', quantity: '6 cups (1.4 L)' }, { name: 'Ginger (grated)', quantity: '2 tbsp' }, { name: 'Salt', quantity: '1 tsp' }, { name: 'Quinoa (rinsed)', quantity: '1 cup (190g)' }, { name: 'Steel-cut oats', quantity: '2 cups (160g)' }], 
+                instructions: '1. Boil lemon peel, water, ginger, and salt. 2. Add quinoa and oats and simmer 20–25 minutes. 3. Stir in lemon juice, remove peel, and serve or refrigerate.', 
+                tags: ['Dairy Free', 'Meal Prep', 'Vegetarian'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/mealprepgrain.jpg',
+                nutrition: { Prep: '15 mins', Cook: '40 mins', Kcal: 200, Fats: 4, Carbs: 36, Protein: 6, Fibre: 4 },
+                storage: 'Refrigerate up to 5 days.'
+            },
+            { 
+                id: 'r49', name: 'Cheesecake Overnight Oats', category: 'Breakfast', 
+                ingredients: [{ name: 'Blueberries', quantity: '1 cup (190g)' }, { name: 'Honey', quantity: '2 tsp' }, { name: 'Vanilla extract', quantity: '1 tsp' }, { name: 'Rolled oats', quantity: '1 cup (80g)' }, { name: 'Cottage cheese (low-fat)', quantity: '1 cup (160g)' }, { name: 'Almond milk', quantity: '1 cup (240ml)' }, { name: 'Almonds (chopped)', quantity: '12' }], 
+                instructions: '1. Mash blueberries with honey and vanilla. 2. Add oats, cottage cheese and almond milk. Chill overnight. 3. Top with almonds before serving.', 
+                tags: ['Meal Prep', 'High Protein', 'Contains Nuts'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/cheescakeovernightaots.jpg',
+                nutrition: { Prep: '10 mins', Cook: '7 hrs chill', Kcal: 378, Fats: 12, Carbs: 49, Protein: 20, Fibre: 7 },
+                storage: 'Refrigerate up to 2 days.'
+            },
+            { 
+                id: 'r50', name: 'Green Goddess Bowl With Tuna Steak', category: 'Lunch', 
+                ingredients: [{ name: 'Quinoa', quantity: '1 cup (190g)' }, { name: 'Broccoli', quantity: '1 head' }, { name: 'Green peas', quantity: '1 cup (135g)' }, { name: 'Mint', quantity: 'Handful' }, { name: 'Basil', quantity: 'Handful' }, { name: 'Avocados', quantity: '2' }, { name: 'Lime juice', quantity: 'From 1 lime' }, { name: 'Baby spinach', quantity: '7 oz (200g)' }, { name: 'Tuna steaks', quantity: '4 (450g)' }, { name: 'Salt & pepper', quantity: 'To taste' }], 
+                instructions: '1. Cook quinoa. 2. Cook broccoli and peas. 3. Blend herbs, 1 avocado, lime juice, salt and pepper. Mix with quinoa. 4. Add diced avocado and spinach. 5. Grill tuna 3–4 minutes per side and serve on top.', 
+                tags: ['Gluten Free', 'Dairy Free', 'High Protein', 'Meal Prep'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/tunasteak.jpg',
+                nutrition: { Prep: '10 mins', Cook: '30 mins', Kcal: 506, Fats: 19, Carbs: 49, Protein: 41, Fibre: 15 },
+                storage: 'Refrigerate quinoa mix up to 2 days. Tuna best fresh.'
+            },
+            { 
+                id: 'r51', name: 'Spinach & Yogurt Dip', category: 'Snack', 
+                ingredients: [{ name: 'Garlic (crushed)', quantity: '1 clove' }, { name: 'Spinach', quantity: '7 oz (200g)' }, { name: 'Olive oil', quantity: '2 tbsp' }, { name: 'Greek yogurt', quantity: '1 cup (285g)' }, { name: 'Dried dill', quantity: '1 tsp' }, { name: 'Pine nuts (toasted)', quantity: '2 tbsp' }, { name: 'Salt & pepper', quantity: 'To taste' }], 
+                instructions: '1. Cook garlic and spinach in olive oil, then cool. 2. Mix with yogurt, dill, salt and pepper. 3. Top with pine nuts and serve.', 
+                tags: ['Gluten Free', 'Low Carb', 'Vegetarian', 'Quick'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/yuogurtdip.jpg',
+                nutrition: { Prep: '5 mins', Cook: '10 mins', Kcal: 148, Fats: 11, Carbs: 6, Protein: 8, Fibre: 1 },
+                storage: 'Refrigerate up to 2 days.'
+            },
+            { 
+                id: 'r52', name: 'Grilled Chimichurri Chicken Salad', category: 'Lunch', 
+                ingredients: [{ name: 'Chimichurri sauce', quantity: '1/2 cup (125g)' }, { name: 'Chicken thighs', quantity: '4 (skinless)' }, { name: 'Olive oil', quantity: '1 tbsp' }, { name: 'Romaine lettuce', quantity: '1 head' }, { name: 'Tomatoes', quantity: '2' }, { name: 'Red onion (sliced)', quantity: '1/2' }, { name: 'Avocados', quantity: '2' }, { name: 'Parsley', quantity: 'Handful' }], 
+                instructions: '1. Marinate chicken in chimichurri for 20 minutes. 2. Grill 4–5 minutes each side. 3. Slice and serve over lettuce, tomato, onion and avocado with remaining sauce.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Low Carb', 'Meal Prep', 'High Protein'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/chickensaladgrill.jpg',
+                nutrition: { Prep: '20 mins', Cook: '10 mins', Kcal: 481, Fats: 37, Carbs: 15, Protein: 26, Fibre: 9 },
+                storage: 'Store ingredients separately up to 2 days.'
+            },
+            { 
+                id: 'r53', name: 'Spicy Tuna Sandwich', category: 'Lunch', 
+                ingredients: [{ name: 'Canned tuna', quantity: '2 x 5 oz (145g)' }, { name: 'Celery (diced)', quantity: '2 stalks' }, { name: 'Green onions', quantity: '4' }, { name: 'Jalapeño (diced)', quantity: '1' }, { name: 'Mayonnaise', quantity: '3/4 cup (170g)' }, { name: 'Lime (zest & juice)', quantity: '1' }, { name: 'Hot sauce', quantity: '1 tbsp' }, { name: 'Cilantro', quantity: '1/2 cup (8g)' }, { name: 'Burger buns', quantity: '4' }, { name: 'Cheese slices', quantity: '4' }, { name: 'Dill pickles (sliced)', quantity: '4' }, { name: 'Tomato (sliced)', quantity: '1' }, { name: 'Avocado (mashed)', quantity: '2' }], 
+                instructions: '1. Combine tuna, celery, onions and jalapeño. 2. Mix in mayo, lime and hot sauce. 3. Toast buns. 4. Assemble with cheese, tuna filling, pickles, tomato and avocado.', 
+                tags: ['Meal Prep', 'High Protein', 'Quick'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/spicytunasadwish.jpg',
+                nutrition: { Prep: '10 mins', Cook: '0 mins', Kcal: 533, Fats: 32, Carbs: 41, Protein: 28, Fibre: 12 },
+                storage: 'Store tuna mix up to 2 days.'
+            },
+            { 
+                id: 'r54', name: 'Flank Steak with Corn & Avocado Salsa', category: 'Dinner', 
+                ingredients: [{ name: 'Flank steak', quantity: '1.5 lbs (680g)' }, { name: 'Garlic powder', quantity: '1 tsp' }, { name: 'Ground cumin', quantity: '1 tsp + 1 tsp' }, { name: 'Paprika', quantity: '1 tbsp' }, { name: 'Chili powder', quantity: '1 tsp' }, { name: 'Coconut sugar', quantity: '1.5 tbsp' }, { name: 'Salt', quantity: '1.5 tsp' }, { name: 'Pepper', quantity: '1.5 tsp' }, { name: 'Olive oil', quantity: '2 tbsp + 2 tbsp' }, { name: 'Sweetcorn', quantity: '1 can (200g)' }, { name: 'Avocado (diced)', quantity: '1' }, { name: 'Red onion (diced)', quantity: '1/2' }, { name: 'Red bell pepper (diced)', quantity: '1' }, { name: 'Cilantro', quantity: '1/3 cup (5g)' }, { name: 'Garlic (crushed)', quantity: '1 clove' }, { name: 'Jalapeño (diced)', quantity: '1' }, { name: 'Lime juice', quantity: '4 tbsp' }], 
+                instructions: '1. Mix spice rub. 2. Coat steak with oil and spice mix. 3. Grill 4–5 minutes per side, rest 5–10 minutes, then slice. 4. Combine salsa ingredients. 5. Serve steak with salsa.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Meal Prep', 'High Protein'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/flanksteak.jpg',
+                nutrition: { Prep: '20 mins', Cook: '15 mins', Kcal: 514, Fats: 30, Carbs: 23, Protein: 41, Fibre: 7 },
+                storage: 'Store separately up to 2 days.'
+            },
+            { 
+                id: 'r55', name: 'Chimichurri Sauce', category: 'Condiment', 
+                ingredients: [{ name: 'Olive oil', quantity: '1/2 cup (120ml)' }, { name: 'Red wine vinegar', quantity: '2 tbsp' }, { name: 'Parsley (chopped)', quantity: '1/2 cup (12g)' }, { name: 'Garlic (chopped)', quantity: '2 cloves' }, { name: 'Red chilies (chopped)', quantity: '2' }, { name: 'Oregano', quantity: '3/4 tsp' }, { name: 'Salt', quantity: '1 tsp' }], 
+                instructions: '1. Blend all ingredients into a thick sauce. 2. Refrigerate up to 2 weeks.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Low Carb', 'Meal Prep', 'Vegetarian', 'Quick'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/chimisauce.jpg',
+                nutrition: { Prep: '10 mins', Cook: '0 mins', Kcal: 128, Fats: 14, Carbs: 2, Protein: 0, Fibre: 1 },
+                storage: 'Refrigerate up to 2 weeks.'
+            },
+            { 
+                id: 'r56', name: 'Balsamic Chicken Buddha Bowl', category: 'Dinner', 
+                ingredients: [{ name: 'Chicken breast', quantity: '14 oz (400g)' }, { name: 'Olive oil', quantity: '1 tbsp + 2 tbsp' }, { name: 'Balsamic vinegar', quantity: '2 tbsp + 2 tsp' }, { name: 'Lemon juice', quantity: 'From 1/2 lemon' }, { name: 'Garlic (crushed)', quantity: '1 clove' }, { name: 'Meal Prep Grain Breakfast Bowl', quantity: '2 portions' }, { name: 'Salad leaves', quantity: '7 oz (200g)' }, { name: 'Cherry tomatoes', quantity: '1 cup (150g)' }, { name: 'Red onion (sliced)', quantity: '1/2' }, { name: 'Black olives', quantity: '3.5 oz (100g)' }, { name: 'Feta (crumbled)', quantity: '2 oz (60g)' }, { name: 'Parsley', quantity: '4 tbsp' }, { name: 'Lemon wedges', quantity: '4' }], 
+                instructions: '1. Cook chicken with oil, balsamic vinegar, lemon juice and garlic. 2. Slice. 3. Assemble bowls with grains, salad, tomatoes, onion, olives, feta, parsley and chicken. 4. Add dressing and serve.', 
+                tags: ['Meal Prep', 'High Protein', 'Quick'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/chickebuddabowl.jpg',
+                nutrition: { Prep: '10 mins', Cook: '15 mins', Kcal: 439, Fats: 16, Carbs: 43, Protein: 31, Fibre: 1 },
+                storage: 'Refrigerate up to 2 days.'
+            },
+            { 
+                id: 'r57', name: 'Slow Cooker Red Curry Pork', category: 'Dinner', 
+                ingredients: [{ name: 'Olive oil', quantity: '1 tbsp' }, { name: 'Pork shoulder (boneless)', quantity: '4.4 lbs (2kg)' }, { name: 'White onion (chopped)', quantity: '1' }, { name: 'Red curry paste', quantity: '4 tbsp' }, { name: 'Coconut milk', quantity: '1 can (400ml)' }, { name: 'Fish sauce', quantity: '2 tsp' }, { name: 'Butternut squash (diced)', quantity: '1.3 lbs (600g)' }, { name: 'Green beans (halved)', quantity: '5.2 oz (150g)' }, { name: 'Cilantro', quantity: 'To garnish' }, { name: 'Lime wedges', quantity: 'To garnish' }], 
+                instructions: '1. Brown pork in olive oil. 2. Add to slow cooker with onion, curry paste, coconut milk, fish sauce and squash. 3. Cook 6 hours on low or 4 hours on high. 4. Add green beans in the last 30 minutes. 5. Serve with lime and cilantro.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Low Carb', 'Meal Prep', 'High Protein'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/currypork.jpg',
+                nutrition: { Prep: '15 mins', Cook: '6 hrs 15 mins', Kcal: 479, Fats: 19, Carbs: 15, Protein: 59, Fibre: 3 },
+                storage: 'Refrigerate up to 3 days or freeze 3 months.'
+            },
+            { 
+                id: 'r58', name: 'Raisin Oat Cookies', category: 'Treat', 
+                ingredients: [{ name: 'Rolled oats', quantity: '6 oz (180g)' }, { name: 'Whole wheat flour', quantity: '6 oz (180g)' }, { name: 'Baking powder', quantity: '1 tbsp' }, { name: 'Coconut sugar', quantity: '3 oz (90g)' }, { name: 'Ground cinnamon', quantity: '1 tsp' }, { name: 'Orange zest', quantity: 'From 1 orange' }, { name: 'Salt', quantity: 'Pinch' }, { name: 'Raisins', quantity: '2 oz (120g)' }, { name: 'Almond milk', quantity: '1/2 cup (125ml)' }, { name: 'Coconut oil (melted)', quantity: '3 oz (90g)' }], 
+                instructions: '1. Mix dry ingredients. 2. Add raisins, almond milk and coconut oil to form a dough. 3. Shape 24 cookies and bake 15–18 minutes at 180°C. 4. Cool on a rack.', 
+                tags: ['Dairy Free', 'Meal Prep', 'Vegetarian', 'Quick', 'Contains Nuts'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/oautcockeis.jpg',
+                nutrition: { Prep: '10 mins', Cook: '18 mins', Kcal: 134, Fats: 5, Carbs: 22, Protein: 2, Fibre: 3 },
+                storage: 'Store in airtight container for 3–4 days.'
+            },
+            { 
+                id: 'r59', name: 'Protein Carrot Cake', category: 'Treat', 
+                ingredients: [{ name: 'Vanilla whey', quantity: '1/3 cup (56g)' }, { name: 'Coconut sugar', quantity: '1/4 cup (45g)' }, { name: 'Coconut flour', quantity: '2 tbsp' }, { name: 'Baking soda', quantity: '1/4 tsp' }, { name: 'Salt', quantity: 'Pinch' }, { name: 'Cinnamon', quantity: '1 tsp' }, { name: 'Nutmeg', quantity: '1/4 tsp' }, { name: 'Cloves', quantity: '1/4 tsp' }, { name: 'Grated carrot', quantity: '3/4 cup (80g)' }, { name: 'Applesauce (unsweetened)', quantity: '1/4 cup (60g)' }, { name: 'Almond butter', quantity: '2 tbsp' }, { name: 'Egg white', quantity: '1' }, { name: 'Walnuts (chopped)', quantity: '2 tbsp' }, { name: 'Desiccated coconut', quantity: '2 tbsp' }, { name: 'Raisins', quantity: '2 tbsp' }, { name: 'Cream cheese (reduced fat)', quantity: '6 oz (170g)' }, { name: 'Coconut sugar (frosting)', quantity: '1/4 cup (45g)' }, { name: 'Vanilla whey (frosting)', quantity: '1 scoop (25g)' }, { name: 'Vanilla extract', quantity: '1/2 tsp' }], 
+                instructions: '1. Mix dry ingredients. 2. Add remaining ingredients to form batter. 3. Pour into lined tin and bake 25–35 minutes at 160°C. 4. Cool. 5. Mix frosting ingredients and spread over cake.', 
+                tags: ['Gluten Free', 'Low Carb', 'Meal Prep', 'Vegetarian', 'Contains Nuts'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/carritcake.jpg',
+                nutrition: { Prep: '15 mins', Cook: '35 mins', Kcal: 251, Fats: 14, Carbs: 17, Protein: 16, Fibre: 3 },
+                storage: 'Store in fridge up to one week.'
+            },
+            { 
+                id: 'r60', name: 'Mango Sorbet', category: 'Treat', 
+                ingredients: [{ name: 'Frozen mango', quantity: '2 cups (165g)' }, { name: 'Coconut yogurt', quantity: '1/4 cup (60g)' }, { name: 'Maple syrup', quantity: '2 tbsp' }], 
+                instructions: '1. Blend all ingredients until smooth. 2. Serve immediately.', 
+                tags: ['Gluten Free', 'Dairy Free', 'Vegetarian', 'Quick'], 
+                image: 'https://raw.githubusercontent.com/pet6988888888/images/refs/heads/main/mangosorpbet.jpg',
+                nutrition: { Prep: '5 mins', Cook: '0 mins', Kcal: 330, Fats: 3, Carbs: 79, Protein: 3, Fibre: 6 },
+                storage: 'Best consumed immediately.'
+            },
         ];
 
         let selectedRecipes = [];
@@ -924,6 +1070,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             initializeFilters();
             setupCoverUpload();
+            initializeCategoryFilterAutoFill();
 
             // Setup event listeners for continue button
             document.querySelector('#step1 button').addEventListener('click', continueFromCover);
@@ -974,6 +1121,19 @@
             renderTagButtons();
         }
 
+        // New function to initialize category filter for autofill options
+        function initializeCategoryFilterAutoFill() {
+            const categoryFilterAutoFill = document.getElementById('categoryFilterAutoFill');
+            categoryFilterAutoFill.innerHTML = '<option value="">All Categories</option>';
+            const uniqueCategories = [...new Set(RECIPES.map(r => r.category))].sort();
+            uniqueCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilterAutoFill.appendChild(option);
+            });
+        }
+
         function renderTagButtons() {
             const tagContainer = document.getElementById('tagButtonContainer');
             tagContainer.innerHTML = '';
@@ -1004,16 +1164,19 @@
             filterRecipes();
         }
 
+        // Modified filterRecipes to include category text search filtering of the recipe list in the modal
         function filterRecipes() {
             const listContainer = document.getElementById('recipeList');
             const category = document.getElementById('categoryFilter').value;
             const activeTags = Array.from(selectedTags);
+            const categorySearch = document.getElementById('categorySearchInput') ? document.getElementById('categorySearchInput').value.trim().toLowerCase() : '';
 
             const filtered = RECIPES.filter(recipe => {
                 const categoryMatch = !category || recipe.category === category;
                 const tagMatch = activeTags.every(tag => recipe.tags.includes(tag));
                 const notAlreadySelected = !selectedRecipes.find(r => r.id === recipe.id);
-                return categoryMatch && tagMatch && notAlreadySelected;
+                const categorySearchMatch = !categorySearch || recipe.category.toLowerCase().includes(categorySearch);
+                return categoryMatch && tagMatch && notAlreadySelected && categorySearchMatch;
             });
 
             listContainer.innerHTML = filtered.map(recipe => `
@@ -1126,8 +1289,10 @@
             document.getElementById('categoryCount').textContent = categories.size;
         }
 
+        // Modified autoFillRecipes to include category filter option
         function autoFillRecipes() {
             const dietFilterValue = document.getElementById('dietFilter').value;
+            const categoryFilterValue = document.getElementById('categoryFilterAutoFill').value;
             const count = parseInt(document.getElementById('recipeCount').value) || 20;
             const dietTag = MAJOR_DIETS[dietFilterValue];
 
@@ -1135,6 +1300,10 @@
 
             if (dietTag && dietFilterValue !== '') {
                 available = available.filter(r => r.tags.includes(dietTag));
+            }
+
+            if (categoryFilterValue && categoryFilterValue !== '') {
+                available = available.filter(r => r.category === categoryFilterValue);
             }
 
             if (available.length === 0) {
